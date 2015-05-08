@@ -6,19 +6,26 @@ workdir=/home/jinxi/pwjobs/au_surf_proj_dos/
 maxthick=11
 incr=2
 minthick=1
-jobprefx=au110_lyr
-samplefile_scf=au110.scf.in
 layersep=2.345
+itrdirprefx=au110_lyr
+scf_samplefile=au110.scf.in
+nscf_fname=au110.nscf.in
+
+doskpt_x=25
+doskpt_y=25
 
 cd $workdir
 
 for (( i=$maxthick; i>=$minthick; i-=$incr ))
 do
   echo "building thickness $i"
-  itrdir=$jobprefx$i
+  itrdir=$itrdirprefx$i
   mkdir $itrdir
-  cp $samplefile_scf $itrdir
-  modfile=$itrdir/$samplefile_scf
+  ##########################
+  # dealing with scf input
+  ##########################
+  cp $scf_samplefile $itrdir
+  modfile=$itrdir/$scf_samplefile
   # modify total atomic number
   sed -i -r "s/(nat=).*/\1$i,/" $modfile
   # find the line number of begining atomic coordinate 
@@ -44,6 +51,22 @@ do
   ln_zcoord_new=`sed -e "s/[^ ]*[^ ]/$zcell/3" <<< $ln_zcoord_old`
   echo $ln_zcoord_new
   sed -i "${nln_zcell}s/[^ ].*/$ln_zcoord_new/" $modfile
+  ##########################
+  # dealing with nscf input
+  ##########################
+  cp $itrdir/$scf_samplefile $itrdir/$nscf_fname
+  nscff=$itrdir/$nscf_fname
+  # change eigen mode, to 'nscf'
+  sed -i -r "s/(calculation =).*/\1'nscf',/" $nscff
+  nln_kptstag=`sed -n '/K_POINTS/=' $nscff`
+  nln_kpts=`expr $nln_kptstag + 1`
+  ln_kpts_old=`sed -n "$nln_kpts p" $nscff`
+  ln_kpts_new=`sed -e "s/[^ ]*[^ ][ ]*[^ ]*[^ ]/$doskpt_x $doskpt_y/1" <<< $ln_kpts_old`
+  echo $ln_kpts_new
+  sed -i "${nln_kpts}s/[^ ].*/$ln_kpts_new/" $nscff
+  ##########################
+  # dealing with pdos input
+  ##########################
 done
 
 
