@@ -2,16 +2,20 @@
 
 echo "Building thickness testing files"
 
+################################################
+# The following sample files should 
+# be prepared in the `workdir`
+scf_samplefile=au110.scf.in
+nscf_fname=au110.nscf.in
+pdos_fname=au110.pdos.in
+pbs_fname=au110.pbs
 workdir=/home/jinxi/pwjobs/au_surf_proj_dos/
+################################################
 maxthick=11
 incr=2
 minthick=1
 layersep=2.345
 itrdirprefx=au110_lyr
-scf_samplefile=au110.scf.in
-nscf_fname=au110.nscf.in
-pdos_fname=au110.pdos.in
-pbs_fname=au110.pbs
 # submit_pbs = auto / manual
 submit_pbs='auto'
 
