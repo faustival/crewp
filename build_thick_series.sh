@@ -10,6 +10,10 @@ layersep=2.345
 itrdirprefx=au110_lyr
 scf_samplefile=au110.scf.in
 nscf_fname=au110.nscf.in
+pdos_fname=au110.pdos.in
+pbs_fname=au110.pbs
+# submit_pbs = auto / manual
+submit_pbs='auto'
 
 doskpt_x=25
 doskpt_y=25
@@ -67,6 +71,14 @@ do
   ##########################
   # dealing with pdos input
   ##########################
+  cp $pdos_fname $itrdir/$pdos_fname
+  ##########################
+  # dealing with pbs input
+  ##########################
+  cp $pbs_fname $itrdir/$pbs_fname
+  pbsf=$itrdir/$pbs_fname
+  # change queue name
+  sed -i -r "s/(#PBS -N ).*/\1 au110_lyr_$i/" $pbsf
 done
 
 
