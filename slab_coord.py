@@ -13,7 +13,7 @@ def wrtcrds(crds, oupf, tag):
 
 
 oup = open('au111samplecoord.log', 'w')
-au111 = surface.fcc111('Au', size=(1,1,30), vacuum=0.0)
+au111 = surface.fcc111('Au', size=(1,1,30), a=4.16, vacuum=0.0)
 
 coords = au111.get_positions()
 cell = au111.get_cell()

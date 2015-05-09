@@ -1,26 +1,30 @@
 #! /bin/bash
 
+# script generate series of pDOS jobs 
+#   for thickness testing 
+#   for Quantum ESPRESSO input files
 echo "Building thickness testing files"
-
 ################################################
 # The following sample files should 
-# be prepared in the `workdir`
-scf_samplefile=au110.scf.in
-nscf_fname=au110.nscf.in
-pdos_fname=au110.pdos.in
-pbs_fname=au110.pbs
-workdir=/home/jinxi/pwjobs/au_surf_proj_dos/
+#   be prepared in the `workdir`
+prfx=au111
+scf_samplefile=$prfx.scf.in
+pdos_fname=$prfx.pdos.in
+pbs_fname=$prfx.pbs
 ################################################
-maxthick=11
+workdir=/home/jinxi/pwjobs/au_surface_proj
+# nscf file generated from scf sample file
+nscf_fname=$prfx.nscf.in
+maxthick=25
 incr=2
-minthick=1
-layersep=2.345
-itrdirprefx=au110_lyr
+minthick=5
+layersep=2.4017771
+itrdirprefx=${prfx}_lyr
 # submit_pbs = auto / manual
 submit_pbs='auto'
 
-doskpt_x=25
-doskpt_y=25
+doskpt_x=45
+doskpt_y=45
 
 cd $workdir
 
@@ -51,7 +55,7 @@ do
   sed -i "/$pttn_start/,/K_POINTS/{//!d}" $modfile
   # calc the cell period of z-axis and replace 
   #   to cell parameter
-  zcell=$(echo "20.0 + $layersep*$i"|bc)
+  zcell=$(echo "20.0 + $layersep*($i-1)"|bc)
   echo z-axis of cell,  $zcell
   nln_cellpar=`sed -n '/CELL_PARAMETERS/=' $modfile`
   nln_zcell=`expr $nln_cellpar + 3`
@@ -82,7 +86,7 @@ do
   cp $pbs_fname $itrdir/$pbs_fname
   pbsf=$itrdir/$pbs_fname
   # change queue name
-  sed -i -r "s/(#PBS -N ).*/\1 au110_lyr_$i/" $pbsf
+  sed -i -r "s/(#PBS -N ).*/\1 ${itrdirprefx}$i/" $pbsf
 done
 
 
