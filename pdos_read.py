@@ -28,9 +28,10 @@ def read_lpdosf(inpfname, spin_pol):
     '''
     inpf = open(inpfname,'r')
     engy = []
-    lpdos = []
-    if spin_pol:
-        lpdos.extend([[],[]])
+    if not spin_pol:
+        lpdos = []
+    elif spin_pol:
+        lpdos = ([],[])
     while True:
         line = inpf.readline()
         if not line:
@@ -45,29 +46,37 @@ def read_lpdosf(inpfname, spin_pol):
             elif spin_pol:
                 lpdos[0].append( float(words[1]) )
                 lpdos[1].append( float(words[2]) )
-    engy_pts = len(engy)
     inpf.close()
-    return engy, lpdos, engy_pts
+    return engy, lpdos
 
 def read_pdos(file_prefx, atom_wfc_list, spin_pol):
     '''
-    [
-      ['1','O' ,['s','p']     ],
-      ['2','Au',['s','p','d'] ],
-      ['4','Au',['s','p','d'] ],
-      ...
-    ]
+    Input of atom_wfc_list like:
+        [
+          ('1','O' ,['s','p']     ),
+          ('2','Au',['s','p','d'] ),
+          ...
+        ]
+    Returns the pdos:
+        [
+          ('1','O' ,[['s',lpdos],['p',lpdos]]             ),
+          ('2','Au',[['s',lpdos],['p',lpdos],['d',lpdos]] ),
+          ...
+        ]
+    Where `lpdos` read from function `read_lpdosf`.
     '''
+    orbital_dict = { 's':'1', 'p':'2', 'd':'3', 'f':'4' }
     pdos = []
-    orbital_indx = { 's':'1', 'p':'2', 'd':'3', 'f':'4' }
-    for atom in atom_wfc_list:
-        print(atom)
-        for wfc in atom[2]:
-            print(wfc)
-            lpdos_fname = file_prefx + '.pdos_atm#' + atom[0] + \
-                              "(" + atom[1] + ')_wfc#' + \
-                              orbital_indx[wfc] + '(' + wfc + ')'
-            print(lpdos_fname)
+    for (atom_id, atom, wfc_list) in atom_wfc_list:
+        pdos_list = []
+        for wfc in wfc_list:
+            lpdos_fname = file_prefx + '.pdos_atm#' + atom_id + \
+                              "(" + atom + ')_wfc#' + \
+                              orbital_dict[wfc] + '(' + wfc + ')'
+            engy, lpdos = read_lpdosf(lpdos_fname, spin_pol)
+            pdos_list.append([wfc, lpdos]) 
+        pdos.append( (atom_id, atom, pdos_list) )
+    return pdos
 
 workpath = '/home/jinxi/pwjobs/au_surface_proj/au111_lyr5/'
 os.chdir(workpath)
@@ -75,19 +84,19 @@ filpdos_prefx = 'au111.pdos.plot'
 spin = True
 atom_list = list( range(1,6) )
 
-orbital_dict = { 'Au' : ['s','p','d'],
+project_dict = { 'Au' : ['s','p','d'],
                  'H'  : ['s'],
                  'O'  : ['s','p'],
                }
 
 atm_wfc_lst = [
-      ['2','Au',['s','p','d'] ],
-      ['4','Au',['s','p','d'] ],
+      ('2','Au',['s','p','d'] ),
+      ('4','Au',['s','p','d'] ),
     ]
 
-read_pdos(filpdos_prefx, atm_wfc_lst, spin)
+pdos = read_pdos(filpdos_prefx, atm_wfc_lst, spin)
 
-
+print(pdos)
 
 sys.exit()
 
