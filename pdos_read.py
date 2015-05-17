@@ -1,10 +1,5 @@
 #! /usr/bin/python3
 
-import os
-import sys
-import numpy as np
-import matplotlib.pyplot as plt
-
 def read_lpdosf(inpfname, spin_pol):
     '''
     input file structure:
@@ -22,7 +17,7 @@ def read_lpdosf(inpfname, spin_pol):
     OUTPUT:
         engy:      1-dim list, raw energy
         lpdos:      If spin-polarized: 
-                       [[spin up array],[spin down array]]
+                       ([spin up array],[spin down array])
                    If not spin-polarized:
                        [lpdos array]
     '''
@@ -76,27 +71,5 @@ def read_pdos(file_prefx, atom_wfc_list, spin_pol):
             engy, lpdos = read_lpdosf(lpdos_fname, spin_pol)
             pdos_list.append([wfc, lpdos]) 
         pdos.append( (atom_id, atom, pdos_list) )
-    return pdos
-
-workpath = '/home/jinxi/pwjobs/au_surface_proj/au111_lyr5/'
-os.chdir(workpath)
-filpdos_prefx = 'au111.pdos.plot'
-spin = True
-atom_list = list( range(1,6) )
-
-project_dict = { 'Au' : ['s','p','d'],
-                 'H'  : ['s'],
-                 'O'  : ['s','p'],
-               }
-
-atm_wfc_lst = [
-      ('2','Au',['s','p','d'] ),
-      ('4','Au',['s','p','d'] ),
-    ]
-
-pdos = read_pdos(filpdos_prefx, atm_wfc_lst, spin)
-
-print(pdos)
-
-sys.exit()
+    return engy, pdos
 
