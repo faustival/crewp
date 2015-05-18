@@ -44,8 +44,13 @@ def read_lpdosf(inpfname, spin_pol):
     inpf.close()
     return engy, lpdos
 
-def read_pdos(file_prefx, atom_wfc_list, spin_pol):
+def read_pdos(file_prefx, atom_wfc_list, spin_pol, sum_spin):
     '''
+    INPUT:
+        file_prefx    : 
+        spin_pol      : Boolean, only used calling `read_lpdosf`
+        sum_spin      : Boolean, sum spin_up and spin_down into 
+                          single list.
     Input of atom_wfc_list like:
         [
           ('1','O' ,['s','p']     ),
@@ -69,7 +74,16 @@ def read_pdos(file_prefx, atom_wfc_list, spin_pol):
                               "(" + atom + ')_wfc#' + \
                               orbital_dict[wfc] + '(' + wfc + ')'
             engy, lpdos = read_lpdosf(lpdos_fname, spin_pol)
+            if spin_pol and sum_spin:
+                lpdos = list( zip(lpdos[0], lpdos[1]) )
+                lpdos = [sum(dos_val) for dos_val in lpdos]
             pdos_list.append([wfc, lpdos]) 
         pdos.append( (atom_id, atom, pdos_list) )
     return engy, pdos
+
+
+
+
+
+
 
