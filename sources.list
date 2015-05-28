@@ -1,0 +1,13 @@
+
+
+deb ftp://mirrors.xmu.edu.cn/debian/debian stretch main contrib non-free
+deb ftp://mirrors.xmu.edu.cn/debian/debian stretch-proposed-updates main contrib non-free
+deb ftp://mirrors.xmu.edu.cn/debian/debian-security stretch/updates main contrib non-free
+
+deb-src ftp://mirrors.xmu.edu.cn/debian/debian stretch main contrib non-free
+deb-src ftp://mirrors.xmu.edu.cn/debian/debian stretch-proposed-updates main contrib non-free
+deb-src ftp://mirrors.xmu.edu.cn/debian/debian-security stretch/updates main contrib non-free
+
+deb http://packages.linuxmint.com debian import
+
+

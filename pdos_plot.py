@@ -11,11 +11,11 @@ project_dict = { 'Au' : ['s','p','d'],
                  'O'  : ['s','p'],
                }
 # Read surface
-workpath = '/home/jinxi/pwjobs/au_surface_proj/au111_lyr17/'
+workpath = '/home/jinxi/pwjobs/au_surface_proj/au111_lyr17/au111.pdos.plot_k45x45'
 os.chdir(workpath)
 filpdos_prefx = 'au111.pdos.plot'
 atom_list = list( range(1,7) )
-fermi = 8.6815
+fermi = 8.6874
 atm_wfc_lst = []
 for id_atom in atom_list:
     atm_wfc_lst.append( ( str(id_atom), 'Au', project_dict['Au'] ) )
