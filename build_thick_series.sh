@@ -7,7 +7,7 @@ echo "Building thickness testing files"
 ################################################
 # The following sample files should 
 #   be prepared in the `workdir`
-prfx=au111
+prfx=au110
 scf_samplefile=$prfx.scf.in
 pdos_fname=$prfx.pdos.in
 pbs_fname=$prfx.pbs
@@ -15,16 +15,16 @@ pbs_fname=$prfx.pbs
 workdir=/home/jinxi/pwjobs/au_surface_proj
 # nscf file generated from scf sample file
 nscf_fname=$prfx.nscf.in
-maxthick=25
+maxthick=17
 incr=2
-minthick=5
-layersep=2.4017771
+minthick=17
+layersep=1.4707821
 itrdirprefx=${prfx}_lyr
 # submit_pbs = auto / manual
 submit_pbs='auto'
 
-doskpt_x=45
-doskpt_y=45
+doskpt_x=65
+doskpt_y=65
 
 cd $workdir
 

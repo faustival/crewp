@@ -12,11 +12,11 @@ def wrtcrds(crds, oupf, tag):
         oupf.write(''.join('%12.7f'%x for x in crd) + '\n') 
 
 
-oup = open('au100samplecoord.log', 'w')
-au111 = surface.fcc100('Au', size=(1,1,30), a=4.16, vacuum=0.0)
+oup = open('au110samplecoord.log', 'w')
+au_slab = surface.fcc110('Au', size=(1,1,30), a=4.16, vacuum=0.0)
 
-coords = au111.get_positions()
-cell = au111.get_cell()
+coords = au_slab.get_positions()
+cell = au_slab.get_cell()
 
 coord_tag = 'atomic coordinates:'
 cell_tag = 'lattice cell vectors:'
@@ -24,7 +24,9 @@ cell_tag = 'lattice cell vectors:'
 print coords
 print cell
 
-
 wrtcrds(coords, oup, coord_tag)
 wrtcrds(cell, oup, cell_tag)
+
+
+
 
