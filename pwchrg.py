@@ -1,5 +1,8 @@
 #! /usr/bin/python3
 
+import numpy as np
+import sys
+
 def get_words(inpf):
     line = inpf.readline()
     return line.split()
@@ -8,20 +11,26 @@ def lines2array(inpf,ncol):
     arry = []
     while True:
         words = get_words(inpf)
-        if len(words)<ncol:
-            break
         if len(words)>ncol:
             print('RESET the column number!')
             break
+        elif len(words)<ncol:
+            rowary = [float(num) for num in words]
+            arry += rowary
+            break
         else:
             rowary = [float(num) for num in words]
-            arry.append(rowary) 
+            arry += rowary
     return arry
 
 def read_pwchrg(inpfname):
     '''
-    read the header of plain text file
+    read the plain text file
+    written by :
     /flib/plot_io.f90 subroutine plot_io()
+
+    returns:
+    chrg3dary:  order 3 array, axis indexed as (z, y, x)
     '''
     inpf = open(inpfname, 'r')
     # title
@@ -61,10 +70,20 @@ def read_pwchrg(inpfname):
         print(words)
     # charge density
     chrg1dary = lines2array(inpf,5)
-    print('length of chrg1d', len(chrg1dary))
     inpf.close()
+    chrg1dary = np.array(chrg1dary)
+    if (len(chrg1dary) != nr3*nr2x*nr1x) :
+        print('Error with charge density reading, length not match!')
+        print('len of charge 1d array',len(chrg1dary))
+        sys.exit()
+    chrg3dary = chrg1dary.reshape(nr3, nr2x, nr1x)
+    print('len of charge 1d array',len(chrg1dary))
+    print('shape of charge 3d array',chrg3dary.shape) 
+    return chrg3dary
 
-inpfname = 'ag100chrg.log'
-read_pwchrg(inpfname)
+
+
+
+
 
 
