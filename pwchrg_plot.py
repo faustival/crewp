@@ -6,7 +6,7 @@ from scipy.integrate import simps
 from pwchrg_read import pwchrg_read
 from pwchrg import PWCharge
 
-inpfname = 'ag100chrg.log'
+inpfname = 'ag100f000_5layer/ag100chrg_d.log'
 
 chrg, cell = pwchrg_read(inpfname)
 
