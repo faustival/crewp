@@ -3,16 +3,12 @@
 import numpy as np
 from scipy.integrate import simps
 
-class PWCharge:
+class ChrgAvg:
     '''
-    By default use atomic (Bohr) unit.
+    All methods are unit independent.
     '''
 
-    def __init__(self, chrg, cell, unit='bohr'):
-        bohr2ang = 0.529177
-        if unit=='ang':
-            chrg = chrg/bohr2ang**3
-            cell = cell*bohr2ang
+    def __init__(self, chrg, cell):
         self.chrg = chrg
         self.cell = cell
         self.ngridz = self.chrg.shape[0]

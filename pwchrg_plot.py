@@ -3,22 +3,27 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import simps
-from pwchrg_read import pwchrg_read
-from pwchrg import PWCharge
+from plotio_read import PlotIORead
+from chrg_avg import ChrgAvg
 
-inpfname = 'ag100f000_5layer/ag100chrg_d.log'
+inpfname = '/home/jinxi/pwjobs/ag100f000_ncpp/chrgsum_60'
 
-chrg, cell = pwchrg_read(inpfname)
+# read raw data 
+plot_raw = PlotIORead(inpfname, 'ang')
+chrg3d = plot_raw.ary3d
+cell = plot_raw.cell
+atom_coord = plot_raw.atom_coord
+print('cell, \n',cell)
+print('atomic coordinates, \n',atom_coord)
 
-slabchrg = PWCharge(chrg, cell, 'ang')
-
-print('charge ang, ',slabchrg.intgrl_z())
+# do the xy-average
+slabchrg = ChrgAvg(chrg3d, cell)
+print('charge integrated ',slabchrg.intgrl_z())
 
 avgchrg = slabchrg.xyavg()
 zaxis = slabchrg.zgrid()
 
 fig = plt.figure()
-plt.plot
 ax = fig.add_subplot( 1, 1, 1)
 ax.plot(zaxis,avgchrg)
 plt.show()

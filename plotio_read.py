@@ -23,14 +23,15 @@ def lines2array(inpf,ncol):
             arry += rowary
     return arry
 
-def pwchrg_read(inpfname):
+def plotio_read(inpfname):
     '''
     read the plain text file
     written by :
     /flib/plot_io.f90 subroutine plot_io()
 
     returns:
-    chrg3dary:  order 3 array, axis indexed as (z, y, x)
+    ary3d:  order 3 array, axis indexed as (z, y, x),
+    because of writing in Fortran type.
     '''
     inpf = open(inpfname, 'r')
     # title
@@ -46,7 +47,7 @@ def pwchrg_read(inpfname):
         cell = np.zeros((3,3))
         for i in range(3):
             words = get_words(inpf)
-            cellvec = np.array([float(nu) for nu in words]) 
+            cellvec = np.array([float(nu) for nu in words])
             cell[i] = cellvec
     # energy cutoff, ...
     words = get_words(inpf)
@@ -64,32 +65,56 @@ def pwchrg_read(inpfname):
         zvalence.append(zval)
     print(zvalence)
     # atomic positions
-    atom_coord = []
+    atom_coord = np.zeros((nat,3))
     for i in range(nat):
         words = get_words(inpf)
-        print(words)
-    # charge density
-    chrg1dary = lines2array(inpf,5)
+        atm = np.array([float(nu) for nu in words[1:4]])
+        atom_coord[i] = atm
+    # 3d array quantities, e.g. charge density, written as '(5(1pe17.9))'
+    ary1d = lines2array(inpf,5)
     inpf.close()
-    chrg1dary = np.array(chrg1dary)
-    if (len(chrg1dary) != nr3*nr2x*nr1x) :
-        print('Error with charge density reading, length not match!')
-        print('len of charge 1d array',len(chrg1dary))
+    ary1d = np.array(ary1d)
+    if (len(ary1d) != nr3*nr2x*nr1x) :
+        print('Error with 3-Dim array reading, length not match!')
+        print('len of 1-Dim array',len(ary1d))
         sys.exit()
-    chrg3dary = chrg1dary.reshape(nr3, nr2x, nr1x)
-    print('len of charge 1d array',len(chrg1dary))
-    print('shape of charge 3d array',chrg3dary.shape) 
+    ary3d = ary1d.reshape(nr3, nr2x, nr1x)
+    print('len of 1-Dim array',len(ary1d))
+    print('shape of 3-Dim array',ary3d.shape) 
     '''
     Convert cell-vectors and atomic positions to 
-    atomic unit, Bohr, charge density grid is set
+    atomic unit, Bohr, 3-Dim grid is set
     with Bohr unit.
     '''
     alat = celldm[0]
     cell = cell*alat
-    print(cell)
-    return chrg3dary, cell
+    atom_coord = atom_coord*alat
+    return ary3d, cell, atom_coord
 
 
+class PlotIORead:
+    '''
+    Containing:
+     * PW Charge
+    and related properties:
+     * cell vectors
+     * atomic positions
+    Default in Bohr unit.
+    '''
+    def __init__(self, inpfname, unit='bohr'):
+        # save all from raw data file
+        ary3d, cell, atom_coord \
+        = plotio_read(inpfname)
+
+        # transform to angstrom unit, if need
+        bohr2ang = 0.529177
+        if unit=='ang':
+            ary3d = ary3d/bohr2ang**3
+            cell = cell*bohr2ang
+            atom_coord = atom_coord*bohr2ang
+        self.ary3d      = ary3d
+        self.cell       = cell
+        self.atom_coord = atom_coord 
 
 
 
