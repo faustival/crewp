@@ -6,7 +6,7 @@ from scipy.integrate import simps
 from plotio_read import PlotIORead
 from chrg_avg import ChrgAvg
 
-inpfname = '/home/jinxi/pwjobs/ag100f000_ncpp/chrgsum_60'
+inpfname = '/home/jinxi/pwjobs/ag100f000_ncpp/chrgsum_035'
 
 # read raw data 
 plot_raw = PlotIORead(inpfname, 'ang')

@@ -16,27 +16,37 @@ def shiftz(crds, shift):
         coord[2] = coord[2] + shift
     return crds
 
+def shift2center(coords):
+    # shift center layer to 0
+    shift_center = (coords[0][2] + coords[-1][2])/2.
+    coords = shiftz(coords, -shift_center)
+    return coords
 
-oup = open('samplecoord.log', 'w')
-slab = surface.fcc111('Ag', size=(1,1,15), a=4.20, vacuum=0.0)
+
+slab = surface.fcc100('Ag', size=(1,1,7), a=4.20, vacuum=0.0)
 
 coords = slab.get_positions()
 cell = slab.get_cell()
 
-# shift center layer to 0
-shift_center = (coords[0][2] + coords[-1][2])/2.
-coords = shiftz(coords, -shift_center)
+# build the vacuum
+coords = shiftz(coords, 20.)
+cell[2][2] += 40.
+
+# shift z-0 to slab center
+#coords = shift2center(coords)
 
 coord_tag = 'atomic coordinates:'
 cell_tag = 'lattice cell vectors:'
 
-wrtcrds(coords, oup, coord_tag)
-wrtcrds(cell, oup, cell_tag)
-
-oup.close()
 
 print coords
 print cell
+
+oup = open('samplecoord.log', 'w')
+wrtcrds(coords, oup, coord_tag)
+wrtcrds(cell, oup, cell_tag)
+oup.close()
+
 
 
 
