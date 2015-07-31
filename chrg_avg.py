@@ -27,6 +27,16 @@ class ChrgAvg:
         xyarea = np.linalg.norm(xycross)
         return xyarea
 
+    def zatompos(self, atom_coord, epsilon=0.000001):
+        zatom = list(atom_coord[:,2])
+        zatom.sort()
+        zatom_dup = [zatom[0]]
+        for i in range(1, len(zatom)):
+            if abs(zatom[i]-zatom[i-1]) > epsilon:
+                zatom_dup.append(zatom[i])
+        zatom_dup = np.array(zatom_dup)
+        return zatom_dup
+
     def intgrl_z(self):
         '''
         mainly for check the average

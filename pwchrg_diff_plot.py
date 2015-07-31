@@ -16,13 +16,18 @@ Sequence of charge density list:
 rootpath = '/home/jinxi/pwjobs/'
 workpathlist = [ 
 #                 [ 'ag100f000_ncpp_15layer_2x2/', ['chrgsum_350','chrgsum_300'] ] , \
+#                 [ 'ag100f010_ncpp_15layer_2x2/', ['chrgsum_350','chrgsum_300'] ] , \
 #                 [ 'ag100f000_ncpp_15layer/'          , ['chrgsum_100','chrgsum_075'] ] , \
 #                 [ 'ag100f010_ncpp_15layer/'          , ['chrgsum_100','chrgsum_075'] ] , \
 #                 [ 'ag100f010_ncpp_15layer_nodip/'    , ['chrgsum_100','chrgsum_075'] ] , \
-                 [ 'ag100f000_ncpp/'            , ['chrgsum_060','chrgsum_035'] ] , \
-                 [ 'ag100f010_ncpp/'            , ['chrgsum_060','chrgsum_035'] ] , \
+#                 [ 'ag100f000_ncpp/'                  , ['chrgsum_060','chrgsum_035'] ] , \
+#                 [ 'ag100f010_ncpp/'                  , ['chrgsum_060','chrgsum_035'] ] , \
                  [ 'ag100f000_ncpp_nosym/'            , ['chrgsum_060','chrgsum_035'] ] , \
                  [ 'ag100f010_ncpp_nosym/'            , ['chrgsum_060','chrgsum_035'] ] , \
+                 [ 'ag100f000_pz/'            , ['chrgsum_060','chrgsum_035'] ] , \
+                 [ 'ag100f010_pz/'            , ['chrgsum_060','chrgsum_035'] ] , \
+#                 [ 'ag111f000_ncpp/'                  , ['chrgsum_060','chrgsum_035'] ] , \
+#                 [ 'ag111f010_ncpp/'                  , ['chrgsum_060','chrgsum_035'] ] , \
                ]
 
 '''
@@ -48,12 +53,18 @@ for [workpath, flist] in workpathlist:
         print('charge integrated, ', slabchrg.intgrl_z())
     # calculate the free density average line
     avgchrg_plot.append(avgchrg_plot[0] - avgchrg_plot[1])
+    # get z-position of atom layers
+    atom_coord = chrgdata.atom_coord
+    zatom = slabchrg.zatompos(atom_coord, .0001)
+    print('atomic layer position, ', zatom)
     # calculate z-axis grid
     atom_coord = chrgdata.atom_coord
+    # shift coordinate
     maxcoords = np.amax(atom_coord,axis = 0)
     zshift = maxcoords[-1]
     print('z-axis shifted, ', zshift)
     zaxis = slabchrg.zgrid() - zshift
+    zatom = zatom - zshift
     avgchrg_plot.append(zaxis)
     avgchrglist.append(avgchrg_plot)
 
@@ -85,6 +96,8 @@ def plot_avglist(avgchrglist):
         ax.set_ylabel(r'$\rho(z)$',size=20)
         ax.set_xlabel(r'$z$ ($\AA$)',size=20)
         #ax.set_xlim([0.0,cell[2,2]*0.529177])
+        for zlayer in zatom:
+            ax.axvline(x=zlayer,linewidth=2,linestyle='--',color='red')
     plt.show()
 
 def plot_fld_diff(diffchrglist):
@@ -103,6 +116,8 @@ def plot_fld_diff(diffchrglist):
         ax.set_ylabel(r'$\rho(z)$',size=20)
         ax.set_xlabel(r'$z$ ($\AA$)',size=20)
         #ax.set_xlim([cell[0,2],cell[2,2]*0.529177])
+        for zlayer in zatom:
+            ax.axvline(x=zlayer,linewidth=2,linestyle='--',color='red')
     plt.show()
 
 diffchrglist = []
