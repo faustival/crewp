@@ -23,7 +23,7 @@ def shift2center(coords):
     return coords
 
 
-slab = surface.fcc111('Ag', size=(1,1,7), a=4.20, vacuum=0.0)
+slab = surface.fcc110('Ag', size=(1,1,7), a=4.20, vacuum=0.0)
 
 coords = slab.get_positions()
 cell = slab.get_cell()

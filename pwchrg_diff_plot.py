@@ -20,14 +20,18 @@ workpathlist = [
 #                 [ 'ag100f000_ncpp_15layer/'          , ['chrgsum_100','chrgsum_075'] ] , \
 #                 [ 'ag100f010_ncpp_15layer/'          , ['chrgsum_100','chrgsum_075'] ] , \
 #                 [ 'ag100f010_ncpp_15layer_nodip/'    , ['chrgsum_100','chrgsum_075'] ] , \
-#                 [ 'ag100f000_ncpp/'                  , ['chrgsum_060','chrgsum_035'] ] , \
+                 [ 'ag100f000_ncpp/'                  , ['chrgsum_060','chrgsum_035'] ] , \
 #                 [ 'ag100f010_ncpp/'                  , ['chrgsum_060','chrgsum_035'] ] , \
-                 [ 'ag100f000_ncpp_nosym/'            , ['chrgsum_060','chrgsum_035'] ] , \
-                 [ 'ag100f010_ncpp_nosym/'            , ['chrgsum_060','chrgsum_035'] ] , \
-                 [ 'ag100f000_pz/'            , ['chrgsum_060','chrgsum_035'] ] , \
-                 [ 'ag100f010_pz/'            , ['chrgsum_060','chrgsum_035'] ] , \
-#                 [ 'ag111f000_ncpp/'                  , ['chrgsum_060','chrgsum_035'] ] , \
+#                 [ 'ag100f000_ncpp_nosym/'            , ['chrgsum_060','chrgsum_035'] ] , \
+#                 [ 'ag100f010_ncpp_nosym/'            , ['chrgsum_060','chrgsum_035'] ] , \
+                 [ 'ag111f000_ncpp/'                  , ['chrgsum_060','chrgsum_035'] ] , \
 #                 [ 'ag111f010_ncpp/'                  , ['chrgsum_060','chrgsum_035'] ] , \
+                 [ 'ag110f000_ncpp/'                  , ['chrgsum_060','chrgsum_035'] ] , \
+#                 [ 'ag110f010_ncpp/'                  , ['chrgsum_060','chrgsum_035'] ] , \
+#                 [ 'pt111f000_ncpp/'                  , ['chrgsum_060','chrgsum_035'] ] , \
+#                 [ 'pt111f010_ncpp/'                  , ['chrgsum_060','chrgsum_035'] ] , \
+#                 [ 'au111f000_ncpp/'                  , ['chrgsum_060','chrgsum_035'] ] , \
+#                 [ 'au111f010_ncpp/'                  , ['chrgsum_060','chrgsum_035'] ] , \
                ]
 
 '''
@@ -48,9 +52,9 @@ for [workpath, flist] in workpathlist:
         cell = chrgdata.cell
         # calculate the average density
         slabchrg = ChrgAvg(chrg3d, cell)
-        avgchrg = slabchrg.xyavg()
+        avgchrg = slabchrg.xyavg()*slabchrg.xyarea()
         avgchrg_plot.append(avgchrg)
-        print('charge integrated, ', slabchrg.intgrl_z())
+        #print('charge integrated, ', slabchrg.intgrl_z())
     # calculate the free density average line
     avgchrg_plot.append(avgchrg_plot[0] - avgchrg_plot[1])
     # get z-position of atom layers
@@ -92,10 +96,10 @@ def plot_avglist(avgchrglist):
         ax_diff.plot(zaxis, avg_free, label=label_list[2])
     axlist = [ax_sum, ax_diff]
     for ax in axlist:
-        ax.legend(loc=9)
+        ax.legend(loc=1)
         ax.set_ylabel(r'$\rho(z)$',size=20)
         ax.set_xlabel(r'$z$ ($\AA$)',size=20)
-        #ax.set_xlim([0.0,cell[2,2]*0.529177])
+        ax.set_xlim([-20., 10.])
         for zlayer in zatom:
             ax.axvline(x=zlayer,linewidth=2,linestyle='--',color='red')
     plt.show()
@@ -112,27 +116,27 @@ def plot_fld_diff(diffchrglist):
         ax_d.plot(zaxis, free, label=label_list[2])
     axlist = [ax_tot, ax_d]
     for ax in axlist:
-        ax.legend(loc=9)
+        ax.legend(loc=1)
         ax.set_ylabel(r'$\rho(z)$',size=20)
         ax.set_xlabel(r'$z$ ($\AA$)',size=20)
-        #ax.set_xlim([cell[0,2],cell[2,2]*0.529177])
+        ax.set_xlim([-20., 10.])
         for zlayer in zatom:
             ax.axvline(x=zlayer,linewidth=2,linestyle='--',color='red')
     plt.show()
 
-diffchrglist = []
-diff = diffchrg( avgchrglist[1] , avgchrglist[0] )
-diffchrglist.append(diff)
-diff = diffchrg( avgchrglist[3] , avgchrglist[2] )
-diffchrglist.append(diff)
+#diffchrglist = []
+#diff = diffchrg( avgchrglist[1] , avgchrglist[0] )
+#diffchrglist.append(diff)
 
 # writing data
-alldata = tuple(diffchrglist[0])
-headtag = ' full_valence     d-valence     free-valence  zaxis'
-np.savetxt('chrgdiff.dat', np.column_stack(alldata), header=headtag)
+for i in range(0,len(avgchrglist)):
+    print('avgchrg writing',i)
+    data = tuple(avgchrglist[i])
+    headtag = ' full_valence     d-valence     free-valence  zaxis'
+    np.savetxt('{0:s}{1:s}{2:s}'.format('chrgdiff_',workpathlist[i][0][:-1],'.dat'), np.column_stack(data), header=headtag)
 
 plot_avglist(avgchrglist)
-plot_fld_diff(diffchrglist)
+#plot_fld_diff(diffchrglist)
 
 
 
