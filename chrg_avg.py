@@ -28,6 +28,9 @@ class ChrgAvg:
         return xyarea
 
     def zatompos(self, atom_coord, epsilon=0.000001):
+        '''
+        find atomic position of layered slab
+        '''
         zatom = list(atom_coord[:,2])
         zatom.sort()
         zatom_dup = [zatom[0]]
@@ -47,5 +50,14 @@ class ChrgAvg:
         total_valence = xyarea*simps(avgchrg, zaxis)
         return total_valence
 
-
+def imgplane(chrgpol, zaxis, slabcenter):
+    # extract proper integrate region
+    idx_center = np.argmin(np.absolute(zaxis-slabcenter))
+    chrgpol_var = chrgpol[idx_center:]
+    zaxis_var = zaxis[idx_center:]
+    # calculate the image plane position
+    int_zrho = simps(chrgpol_var*zaxis_var, zaxis_var)
+    int_rho = simps(chrgpol_var, zaxis_var)
+    z0 = int_zrho/int_rho
+    return z0
 

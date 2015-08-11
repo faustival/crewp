@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from scipy.integrate import simps
 from plotio_read import PlotIORead
 from chrg_avg import ChrgAvg
+from chrg_avg import imgplane
 
 '''
 Sequence of charge density list:
@@ -39,6 +40,7 @@ avgchrglist =
 ]
 '''
 avgchrglist = []
+zatomlist = []
 for [workpath, flist] in workpathlist:
     avgchrg_plot = []
     for fname in flist:
@@ -50,7 +52,7 @@ for [workpath, flist] in workpathlist:
         cell = chrgdata.cell
         # calculate the average density
         slabchrg = ChrgAvg(chrg3d, cell)
-        avgchrg = slabchrg.xyavg()*slabchrg.xyarea()
+        avgchrg = slabchrg.xyavg()#*slabchrg.xyarea()
         avgchrg_plot.append(avgchrg)
         #print('charge integrated, ', slabchrg.intgrl_z())
     # calculate the free density average line
@@ -68,6 +70,7 @@ for [workpath, flist] in workpathlist:
     zaxis = slabchrg.zgrid() - zshift
     zatom = zatom - zshift
     avgchrg_plot.append(zaxis)
+    zatomlist.append(zatom)
     avgchrglist.append(avgchrg_plot)
 
 # plot average charge 
@@ -92,7 +95,7 @@ def plot_avglist(avgchrglist):
             ax.axvline(x=zlayer,linewidth=2,linestyle='--',color='red')
     plt.show()
 
-def plot_fld_diff(diffchrglist):
+def plot_fld_diff(diffchrglist,imgplanelist):
     label_list = [r'Total valence', r'$\rho$ of $d$ band sum', r'Free charge density']
     fig2 = plt.figure()
     ax_tot  = fig2.add_subplot( 2, 1, 1)
@@ -110,6 +113,8 @@ def plot_fld_diff(diffchrglist):
         ax.set_xlim([0., 10.])
         for zlayer in zatom:
             ax.axvline(x=zlayer,linewidth=2,linestyle='--',color='red')
+        for zimg in imgplanelist:
+            ax.axvline(x=zimg, linewidth=2,linestyle='--')#,color='green')
     plt.show()
 
 # difference charge with field
@@ -123,10 +128,16 @@ def diffld(avgchrglist, ncurve):
         diffchrg.append(chrg0[-1])
         return diffchrg
     diffchrglist = []
+    imgplanelist = []
     for i in range(0,ncurve):
+        # calculate charge difference
         diff = diffchrg( avgchrglist[2*i+1] , avgchrglist[2*i] )
         diffchrglist.append(diff)
-    return diffchrglist
+        # calculate image plane
+        slabcenter = .5*(zatomlist[2*i][0] + zatomlist[2*i][-1])
+        z0 = imgplane(diff[0], diff[-1], slabcenter)
+        imgplanelist.append(z0)
+    return diffchrglist, imgplanelist
 
 # writing data
 for i in range(0,len(avgchrglist)):
@@ -135,10 +146,9 @@ for i in range(0,len(avgchrglist)):
     headtag = ' full_valence     d-valence     free-valence  zaxis'
     np.savetxt('{0:s}{1:s}{2:s}'.format('chrgdiff_',workpathlist[i][0][:-1],'.dat'), np.column_stack(data), header=headtag)
 
-diffchrglist = diffld(avgchrglist, 3)
+diffchrglist, imgplanelist = diffld(avgchrglist, 3)
 
 plot_avglist(avgchrglist)
-plot_fld_diff(diffchrglist)
-
+plot_fld_diff(diffchrglist,imgplanelist)
 
 
