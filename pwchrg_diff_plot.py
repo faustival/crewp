@@ -5,8 +5,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import simps
 from plotio_read import PlotIORead
-from chrg_avg import ChrgAvg
-from chrg_avg import imgplane
+from chrg_avgz import ChrgAvgZ
+from slab_indchrg import SlabIndChrg
 
 '''
 Sequence of charge density list:
@@ -16,21 +16,23 @@ Sequence of charge density list:
 
 rootpath = '/home/jinxi/pwjobs/'
 workpathlist = [ 
-#                 [ 'ag100f000_ncpp_15layer_2x2/', ['chrgsum_350','chrgsum_300'] ] , \
-#                 [ 'ag100f010_ncpp_15layer_2x2/', ['chrgsum_350','chrgsum_300'] ] , \
-#                 [ 'ag100f000_ncpp_15layer/'          , ['chrgsum_100','chrgsum_075'] ] , \
-#                 [ 'ag100f010_ncpp_15layer/'          , ['chrgsum_100','chrgsum_075'] ] , \
-#                 [ 'ag100f010_ncpp_15layer_nodip/'    , ['chrgsum_100','chrgsum_075'] ] , \
-                 [ 'ag111f000_ncpp/'                  , ['chrgsum_060','chrgsum_035'] ] , \
-                 [ 'ag111f010_ncpp/'                  , ['chrgsum_060','chrgsum_035'] ] , \
-                 [ 'ag100f000_ncpp/'                  , ['chrgsum_060','chrgsum_035'] ] , \
-                 [ 'ag100f010_ncpp/'                  , ['chrgsum_060','chrgsum_035'] ] , \
-                 [ 'ag110f000_ncpp/'                  , ['chrgsum_060','chrgsum_035'] ] , \
-                 [ 'ag110f010_ncpp/'                  , ['chrgsum_060','chrgsum_035'] ] , \
-#                 [ 'pt111f000_ncpp/'                  , ['chrgsum_060','chrgsum_035'] ] , \
-#                 [ 'pt111f010_ncpp/'                  , ['chrgsum_060','chrgsum_035'] ] , \
-#                 [ 'au111f000_ncpp/'                  , ['chrgsum_060','chrgsum_035'] ] , \
-#                 [ 'au111f010_ncpp/'                  , ['chrgsum_060','chrgsum_035'] ] , \
+
+                [ 'ag111f000_ncpp/'  , ['chrgsum_060','chrgsum_035'] ] , \
+                [ 'ag111f010_ncpp/'  , ['chrgsum_060','chrgsum_035'] ] , \
+                [ 'ag100f000_ncpp/'  , ['chrgsum_060','chrgsum_035'] ] , \
+                [ 'ag100f010_ncpp/'  , ['chrgsum_060','chrgsum_035'] ] , \
+                [ 'ag110f000_ncpp/'  , ['chrgsum_060','chrgsum_035'] ] , \
+                [ 'ag110f010_ncpp/'  , ['chrgsum_060','chrgsum_035'] ] , \
+
+#                [ 'au111f000_ncpp/'  , ['chrgsum_060','chrgsum_035'] ] , \
+#                [ 'au111f010_ncpp/'  , ['chrgsum_060','chrgsum_035'] ] , \
+#                [ 'au100f000_ncpp/'  , ['chrgsum_060','chrgsum_035'] ] , \
+#                [ 'au100f010_ncpp/'  , ['chrgsum_060','chrgsum_035'] ] , \
+
+#                [ 'pt111f000_ncpp/'  , ['chrgsum_060','chrgsum_035'] ] , \
+#                [ 'pt111f010_ncpp/'  , ['chrgsum_060','chrgsum_035'] ] , \
+#                [ 'pt100f000_ncpp/'  , ['chrgsum_060','chrgsum_035'] ] , \
+#                [ 'pt100f010_ncpp/'  , ['chrgsum_060','chrgsum_035'] ] , \
                ]
 
 '''
@@ -51,7 +53,7 @@ for [workpath, flist] in workpathlist:
         chrg3d = chrgdata.ary3d
         cell = chrgdata.cell
         # calculate the average density
-        slabchrg = ChrgAvg(chrg3d, cell)
+        slabchrg = ChrgAvgZ(chrg3d, cell)
         avgchrg = slabchrg.xyavg()#*slabchrg.xyarea()
         avgchrg_plot.append(avgchrg)
         #print('charge integrated, ', slabchrg.intgrl_z())
@@ -90,7 +92,7 @@ def plot_avglist(avgchrglist):
         ax.legend(loc=1)
         ax.set_ylabel(r'$\rho(z)$',size=20)
         ax.set_xlabel(r'$z$ ($\AA$)',size=20)
-        ax.set_xlim([0., 10.])
+        ax.set_xlim([-20., 10.])
         for zlayer in zatom:
             ax.axvline(x=zlayer,linewidth=2,linestyle='--',color='red')
     plt.show()
@@ -110,7 +112,7 @@ def plot_fld_diff(diffchrglist,imgplanelist):
         ax.legend(loc=1)
         ax.set_ylabel(r'$\rho(z)$',size=20)
         ax.set_xlabel(r'$z$ ($\AA$)',size=20)
-        ax.set_xlim([0., 10.])
+        ax.set_xlim([-20., 10.])
         for zlayer in zatom:
             ax.axvline(x=zlayer,linewidth=2,linestyle='--',color='red')
         for zimg in imgplanelist:
@@ -124,7 +126,10 @@ def diffld(avgchrglist, ncurve):
         chrgf, chrg0 =  
         [avg_total, avg_d, avg_free, zaxis ] 
         '''
-        diffchrg = [ (chrgf[i] - chrg0[i]) for i in range(3) ]
+        diffchrg = []
+        for i in range(3):
+            slabind = SlabIndChrg(chrgf[i], chrg0[i], chrg0[-1])
+            diffchrg.append(slabind.chrgind)
         diffchrg.append(chrg0[-1])
         return diffchrg
     diffchrglist = []
@@ -135,8 +140,8 @@ def diffld(avgchrglist, ncurve):
         diffchrglist.append(diff)
         # calculate image plane
         slabcenter = .5*(zatomlist[2*i][0] + zatomlist[2*i][-1])
-        z0 = imgplane(diff[0], diff[-1], slabcenter)
-        imgplanelist.append(z0)
+        slabind = SlabIndChrg(avgchrglist[2*i+1][0], avgchrglist[2*i][0], avgchrglist[2*i][-1])
+        imgplanelist.append(slabind.imgplane(slabcenter))
     return diffchrglist, imgplanelist
 
 # writing data

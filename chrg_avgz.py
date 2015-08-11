@@ -3,7 +3,7 @@
 import numpy as np
 from scipy.integrate import simps
 
-class ChrgAvg:
+class ChrgAvgZ:
     '''
     All methods are unit independent.
     '''
@@ -42,7 +42,7 @@ class ChrgAvg:
 
     def intgrl_z(self):
         '''
-        mainly for check the average
+        mainly for check the charge integration
         '''
         xyarea = self.xyarea()
         avgchrg = self.xyavg()
@@ -50,14 +50,4 @@ class ChrgAvg:
         total_valence = xyarea*simps(avgchrg, zaxis)
         return total_valence
 
-def imgplane(chrgpol, zaxis, slabcenter):
-    # extract proper integrate region
-    idx_center = np.argmin(np.absolute(zaxis-slabcenter))
-    chrgpol_var = chrgpol[idx_center:]
-    zaxis_var = zaxis[idx_center:]
-    # calculate the image plane position
-    int_zrho = simps(chrgpol_var*zaxis_var, zaxis_var)
-    int_rho = simps(chrgpol_var, zaxis_var)
-    z0 = int_zrho/int_rho
-    return z0
 
