@@ -24,3 +24,6 @@ class SlabIndChrg:
         int_rho = simps(chrgind_var, zaxis_var)
         self.z0 = int_zrho/int_rho
         return self.z0
+
+
+

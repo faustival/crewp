@@ -34,8 +34,10 @@ slablist = [
   { 'elem':'Au', 'ort':'110', 'bands':[60,35], 'flds':[0.0, 0.1] },
            ]
 
-readinlist = [item for item in slablist if item['ort']=='111' ]
-#readinlist = [item for item in slablist if item['elem']=='Ag' ]
+#readinlist = [item for item in slablist if item['ort']=='111' ]
+readinlist = [item for item in slablist if item['elem']=='Ag' ]
+plotxlim = [0., 5.]
+colorlist = ('b', 'g', 'r', 'c', 'm', 'y', 'k')
 
 fig_nofld   = plt.figure()
 fig_difffld = plt.figure()
@@ -46,32 +48,40 @@ ax_diff_free = fig_difffld.add_subplot(2,1,2)
 axlist = [ax_nofld_sum, ax_nofld_free, ax_diff_tot, ax_diff_free]
 ax_nofld = [ax_nofld_sum, ax_nofld_free]
 ax_diff = [ax_diff_tot, ax_diff_free]
+imgplane_list = []
+counter = -1
 for slabdict in readinlist:
     print( 'Processing', slabdict['elem'], slabdict['ort'], '...' )
+    counter += 1
     # get data
     slab = SlabFreeChrg(slabdict)
     slab.zshift_maxlayer()
     slab.set_chrgz_fld()
     slab.set_flddiff()
     slab.set_imgplane()
+    imgplane_list.append(slab.imgplane)
     # write data file
     slab.wrtdata()
     # plot data, temporarily no field iteration
-    ax_nofld_sum.plot(slab.zaxis, slab.chrgz[0][0])
-    ax_nofld_sum.plot(slab.zaxis, slab.chrgz[0][1])
-    ax_nofld_free.plot(slab.zaxis, slab.chrgz[0][2])
-    ax_diff_tot.plot(slab.zaxis, slab.chrgz_diffld[0][0])
-    ax_diff_free.plot(slab.zaxis, slab.chrgz_diffld[0][1])
-    ax_diff_free.plot(slab.zaxis, slab.chrgz_diffld[0][2])
+    color = colorlist[counter % len(colorlist)]
+    legend_pref = slab.elem + slab.ort
+    ax_nofld_sum.plot(slab.zaxis, slab.chrgz[0][0], color=color, label=legend_pref+' Total')
+    ax_nofld_sum.plot(slab.zaxis, slab.chrgz[0][1], color=color, linestyle='--', dashes=(5,1.5), label=legend_pref+' $d$')
+    ax_nofld_free.plot(slab.zaxis, slab.chrgz[0][2], color=color, label=legend_pref+' Free')
+    # 
+    ax_diff_tot.plot(slab.zaxis, slab.chrgz_diffld[0][0], color=color, label=legend_pref+' Total')
+    ax_diff_free.plot(slab.zaxis, slab.chrgz_diffld[0][1], color=color, linestyle='--', dashes=(5,1.5), label=legend_pref+' $d$')
+    ax_diff_free.plot(slab.zaxis, slab.chrgz_diffld[0][2], color=color, label=legend_pref+' Free')
     for ax in ax_diff:
         for z0 in slab.imgplane:
-            ax.axvline(x=z0, linewidth=2,linestyle='--')#,color='green')
+            ax.axvline(x=z0, color=color, linewidth=1, linestyle='--')
     for ax in axlist:
         ax.legend(loc=1)
         ax.set_ylabel(r'$\rho(z)$',size=20)
         ax.set_xlabel(r'$z$ ($\AA$)',size=20)
-        ax.set_xlim([0., 10.])
+        ax.set_xlim(plotxlim)
         ax.axvline(x=slab.zatom[-1],linewidth=2,linestyle='--',color='red')
+print('List of image plane, ', imgplane_list)
 plt.show()
 
 

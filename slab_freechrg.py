@@ -70,7 +70,7 @@ class SlabFreeChrg:
         '''
         chrgdata = PlotIORead(inpfname, 'ang')
         slabchrg = ChrgAvgZ(chrgdata.ary3d, chrgdata.cell)
-        avgchrg = slabchrg.xyavg()*slabchrg.xyarea()
+        avgchrg = slabchrg.xyavg()#*slabchrg.xyarea()
         return avgchrg
 
     def get_chrgz(self, field):
