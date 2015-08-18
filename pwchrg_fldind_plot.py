@@ -34,17 +34,23 @@ slablist = [
   { 'elem':'Au', 'ort':'110', 'bands':[60,35], 'flds':[0.0, 0.1] },
            ]
 
-#readinlist = [item for item in slablist if item['ort']=='111' ]
-readinlist = [item for item in slablist if item['elem']=='Ag' ]
+readinlist = [item for item in slablist if item['ort']=='111' ]
+#readinlist = [item for item in slablist if item['elem']=='Ag' ]
 plotxlim = [0., 5.]
 colorlist = ('b', 'g', 'r', 'c', 'm', 'y', 'k')
+labelfontsize = 30
 
+# creat figures
 fig_nofld   = plt.figure()
 fig_difffld = plt.figure()
+# list figure combinations
+figlist = [fig_nofld, fig_difffld]
+# create subplots
 ax_nofld_sum  = fig_nofld.add_subplot(2,1,1)
 ax_nofld_free = fig_nofld.add_subplot(2,1,2) 
 ax_diff_tot  = fig_difffld.add_subplot(2,1,1)
 ax_diff_free = fig_difffld.add_subplot(2,1,2)
+# list axes combinations
 axlist = [ax_nofld_sum, ax_nofld_free, ax_diff_tot, ax_diff_free]
 ax_nofld = [ax_nofld_sum, ax_nofld_free]
 ax_diff = [ax_diff_tot, ax_diff_free]
@@ -72,16 +78,23 @@ for slabdict in readinlist:
     ax_diff_tot.plot(slab.zaxis, slab.chrgz_diffld[0][0], color=color, label=legend_pref+' Total')
     ax_diff_free.plot(slab.zaxis, slab.chrgz_diffld[0][1], color=color, linestyle='--', dashes=(5,1.5), label=legend_pref+' $d$')
     ax_diff_free.plot(slab.zaxis, slab.chrgz_diffld[0][2], color=color, label=legend_pref+' Free')
-    for ax in ax_diff:
-        for z0 in slab.imgplane:
-            ax.axvline(x=z0, color=color, linewidth=1, linestyle='--')
+    # all axes
     for ax in axlist:
         ax.legend(loc=1)
-        ax.set_ylabel(r'$\rho(z)$',size=20)
-        ax.set_xlabel(r'$z$ ($\AA$)',size=20)
+        ax.set_xlabel(r'$z$ ($\AA$)',size=labelfontsize)
         ax.set_xlim(plotxlim)
         ax.axvline(x=slab.zatom[-1],linewidth=2,linestyle='--',color='red')
+    # axis of 0-field charge
+    for ax in ax_nofld:
+        ax.set_ylabel(r'$\rho(z)$',size=labelfontsize)
+    # axis of field difference
+    for ax in ax_diff:
+        ax.set_ylabel(r'$\Delta\rho(z)$',size=labelfontsize)
+        for z0 in slab.imgplane:
+            ax.axvline(x=z0, color=color, linewidth=1, linestyle='--')
 print('List of image plane, ', imgplane_list)
+for fig in figlist:
+    fig.subplots_adjust(left=0.07, right=0.98, top=0.95, bottom=0.1)
 plt.show()
 
 
