@@ -27,6 +27,8 @@ slablist = [
   { 'elem':'Ag', 'ort':'100', 'bands':[60,35], 'flds':[0.0, 0.1] },
   { 'elem':'Ag', 'ort':'110', 'bands':[60,35], 'flds':[0.0, 0.1] },
   { 'elem':'Pt', 'ort':'111', 'bands':[60,35], 'flds':[0.0, 0.1] },
+  { 'elem':'Pt-H', 'ort':'111', 'bands':[60,35], 'flds':[0.0, 0.1] },
+  { 'elem':'Pt-H-Sym', 'ort':'111', 'bands':[60,35], 'flds':[0.0, 0.1] },
   { 'elem':'Pt', 'ort':'100', 'bands':[60,35], 'flds':[0.0, 0.1] },
   { 'elem':'Pt', 'ort':'110', 'bands':[60,35], 'flds':[0.0, 0.1] },
   { 'elem':'Au', 'ort':'111', 'bands':[60,35], 'flds':[0.0, 0.1] },
@@ -36,7 +38,7 @@ slablist = [
 
 readinlist = [item for item in slablist if item['ort']=='111' ]
 #readinlist = [item for item in slablist if item['elem']=='Ag' ]
-plotxlim = [0., 5.]
+plotxlim = [-20., 5.]
 colorlist = ('b', 'g', 'r', 'c', 'm', 'y', 'k')
 labelfontsize = 30
 
@@ -61,10 +63,23 @@ for slabdict in readinlist:
     counter += 1
     # get data
     slab = SlabFreeChrg(slabdict)
-    slab.zshift_maxlayer()
+    # shift to align
+    if slab.elem=='Pt-H':
+        slab.zshift_layer(1)
+    elif slab.elem=='Pt-H-Sym':
+        slab.zshift_layer(1)
+    else:
+        slab.zshift_layer(0)
+    print('atomic layers', slab.zatom)
     slab.set_chrgz_fld()
     slab.set_flddiff()
-    slab.set_imgplane()
+    # compute the imageplane for different center reference
+    if slab.elem=='Pt-H':
+        slab.set_imgplane([1,-1])
+    if slab.elem=='Pt-H-Sym':
+        slab.set_imgplane([1,-2])
+    else:
+        slab.set_imgplane([0,-1])
     imgplane_list.append(slab.imgplane)
     # write data file
     slab.wrtdata()
@@ -75,15 +90,16 @@ for slabdict in readinlist:
     ax_nofld_sum.plot(slab.zaxis, slab.chrgz[0][1], color=color, linestyle='--', dashes=(5,1.5), label=legend_pref+' $d$')
     ax_nofld_free.plot(slab.zaxis, slab.chrgz[0][2], color=color, label=legend_pref+' Free')
     # 
-    ax_diff_tot.plot(slab.zaxis, slab.chrgz_diffld[0][0], color=color, label=legend_pref+' Total')
-    ax_diff_free.plot(slab.zaxis, slab.chrgz_diffld[0][1], color=color, linestyle='--', dashes=(5,1.5), label=legend_pref+' $d$')
-    ax_diff_free.plot(slab.zaxis, slab.chrgz_diffld[0][2], color=color, label=legend_pref+' Free')
+    ax_diff_tot.plot(slab.zaxis, -slab.chrgz_diffld[0][0], color=color, label=legend_pref+' Total')
+    ax_diff_free.plot(slab.zaxis, -slab.chrgz_diffld[0][1], color=color, linestyle='--', dashes=(5,1.5), label=legend_pref+' $d$')
+    ax_diff_free.plot(slab.zaxis, -slab.chrgz_diffld[0][2], color=color, label=legend_pref+' Free')
     # all axes
     for ax in axlist:
         ax.legend(loc=1)
         ax.set_xlabel(r'$z$ ($\AA$)',size=labelfontsize)
         ax.set_xlim(plotxlim)
-        ax.axvline(x=slab.zatom[-1],linewidth=2,linestyle='--',color='red')
+        #for atompos in slab.zatom:
+        #    ax.axvline(x=atompos,linewidth=1,linestyle='-',color=color)
     # axis of 0-field charge
     for ax in ax_nofld:
         ax.set_ylabel(r'$\rho(z)$',size=labelfontsize)

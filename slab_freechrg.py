@@ -4,7 +4,6 @@ import numpy as np
 from scipy.integrate import simps
 from plotio_read import PlotIORead
 from chrg_avgz import ChrgAvgZ
-from slab_indchrg import SlabIndChrg
 
 
 class SlabFreeChrg:
@@ -47,12 +46,16 @@ class SlabFreeChrg:
         # get 0-field averaged z-charge densities
         self.chrgz = [self.get_chrgz(0.0)]
 
-    def zshift_maxlayer(self):
-        self.zmaxatm = np.amax(self.zatom)
-        self.zaxis -= self.zmaxatm
-        self.zatom -= self.zmaxatm
+    def zshift_layer(self, nlayer):
+        '''
+        shift coordinate reference along z-axis
+        nlayer to indicate the n-th max top atom
+        '''
+        zshft = self.zatom[nlayer]
+        self.zaxis -= zshft
+        self.zatom -= zshft
         if hasattr(self, 'imgplane'):
-            self.imgplane = [ (imgplane - self.zmaxatm) for imgplane in self.imgplane ]
+            self.imgplane = [ (imgplane - zshft) for imgplane in self.imgplane ]
 
     def inpfname(self, nband, field):
         inpfname = self.elem.lower() + \
@@ -86,10 +89,8 @@ class SlabFreeChrg:
         return [chrgz_tot, chrgz_d, chrgz_free]
 
     def get_imgplane(self, chrgind):
-        # compute center position of slab
-        slabcenter = .5*(self.zatom[0] + self.zatom[-1])
         # extract proper integrate region
-        idx_center = np.argmin(np.absolute(self.zaxis-slabcenter))
+        idx_center = np.argmin(np.absolute(self.zaxis-self.slabcenter))
         chrgind_var = chrgind[idx_center:]
         zaxis_var = self.zaxis[idx_center:]
         # calculate the image plane position
@@ -115,7 +116,14 @@ class SlabFreeChrg:
             chrgz_diffld = [ (self.chrgz[i][j] - self.chrgz[0][j]) for j in range(0,3) ] 
             self.chrgz_diffld.append(chrgz_diffld)
 
-    def set_imgplane(self):
+    def set_imgplane(self, outer_layerlist):
+        '''
+        outer_layerlist: [index_top_atom, index_bottom_atom]
+        reference to `self.zatom`
+        (Note `self.zatom` is in descending order.)
+        '''
+        # compute center position of slab
+        self.slabcenter = .5*(outer_layerlist[0] + outer_layerlist[1])
         self.imgplane = []
         for chrgz_diffld in self.chrgz_diffld:
             chrgz_ind = chrgz_diffld[0]
