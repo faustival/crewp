@@ -31,10 +31,12 @@ class SlabFreeChrg:
         Example input `slabdict` structure:
         { 'elem':'Au', 'ort':'111', 'bands':[60,35], 'flds':[0.0, 0.1] },
         '''
-        self.elem  = slabdict['elem']
-        self.ort   = slabdict['ort']
-        self.bands = slabdict['bands']
-        self.flds  = slabdict['flds']
+        self.elem    = slabdict['elem']
+        self.ort     = slabdict['ort']
+        self.bands   = slabdict['bands']
+        self.flds    = slabdict['flds']
+        self.shift   = slabdict['shift']
+        self.slablmt = slabdict['slablmt']
         # get info from 0-field charge output
         inpf = self.inpfname(self.bands[0], 0.0)
         slabinit = PlotIORead(inpf, 'ang')
@@ -46,12 +48,12 @@ class SlabFreeChrg:
         # get 0-field averaged z-charge densities
         self.chrgz = [self.get_chrgz(0.0)]
 
-    def zshift_layer(self, nlayer):
+    def zshift_layer(self):
         '''
         shift coordinate reference along z-axis
-        nlayer to indicate the n-th max top atom
+        self.shift to indicate the n-th max top atom
         '''
-        zshft = self.zatom[nlayer]
+        zshft = self.zatom[self.shift]
         self.zaxis -= zshft
         self.zatom -= zshft
         if hasattr(self, 'imgplane'):
@@ -116,14 +118,14 @@ class SlabFreeChrg:
             chrgz_diffld = [ (self.chrgz[i][j] - self.chrgz[0][j]) for j in range(0,3) ] 
             self.chrgz_diffld.append(chrgz_diffld)
 
-    def set_imgplane(self, outer_layerlist):
+    def set_imgplane(self):
         '''
-        outer_layerlist: [index_top_atom, index_bottom_atom]
+        self.slablmt: [index_top_atom, index_bottom_atom]
         reference to `self.zatom`
         (Note `self.zatom` is in descending order.)
         '''
         # compute center position of slab
-        self.slabcenter = .5*(outer_layerlist[0] + outer_layerlist[1])
+        self.slabcenter = .5*(self.slablmt[0] + self.slablmt[1])
         self.imgplane = []
         for chrgz_diffld in self.chrgz_diffld:
             chrgz_ind = chrgz_diffld[0]

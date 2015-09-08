@@ -22,14 +22,14 @@ def shift2center(coords):
     coords = shiftz(coords, -shift_center)
     return coords
 
-
-slab = surface.fcc110('Pt', size=(1,1,7), a=4.014, vacuum=0.0)
+slab = surface.fcc111('Ag', size=(1,1,21), a=4.200, vacuum=0.0)
 
 coords = slab.get_positions()
 cell = slab.get_cell()
 
-# build the vacuum
+# shift slab along z
 coords = shiftz(coords, 20.)
+# build the vacuum
 cell[2][2] += 40.
 
 # shift z-0 to slab center
@@ -37,7 +37,6 @@ cell[2][2] += 40.
 
 coord_tag = 'atomic coordinates:'
 cell_tag = 'lattice cell vectors:'
-
 
 print coords
 print cell

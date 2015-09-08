@@ -23,21 +23,24 @@ Data from class SlabFreeChrg:
 rootpath = '/home/jinxi/pwjobs/'
 os.chdir(rootpath)
 slablist = [
-  { 'elem':'Ag', 'ort':'111', 'bands':[60,35], 'flds':[0.0, 0.1] },
-  { 'elem':'Ag', 'ort':'100', 'bands':[60,35], 'flds':[0.0, 0.1] },
-  { 'elem':'Ag', 'ort':'110', 'bands':[60,35], 'flds':[0.0, 0.1] },
-  { 'elem':'Pt', 'ort':'111', 'bands':[60,35], 'flds':[0.0, 0.1] },
-  { 'elem':'Pt-H', 'ort':'111', 'bands':[60,35], 'flds':[0.0, 0.1] },
-  { 'elem':'Pt-H-Sym', 'ort':'111', 'bands':[60,35], 'flds':[0.0, 0.1] },
-  { 'elem':'Pt', 'ort':'100', 'bands':[60,35], 'flds':[0.0, 0.1] },
-  { 'elem':'Pt', 'ort':'110', 'bands':[60,35], 'flds':[0.0, 0.1] },
-  { 'elem':'Au', 'ort':'111', 'bands':[60,35], 'flds':[0.0, 0.1] },
-  { 'elem':'Au', 'ort':'100', 'bands':[60,35], 'flds':[0.0, 0.1] },
-  { 'elem':'Au', 'ort':'110', 'bands':[60,35], 'flds':[0.0, 0.1] },
+  { 'elem':'Ag',    'ort':'111', 'bands':[60,35], 'flds':[0.0, 0.1], 'shift':0, 'slablmt':[0,-1],},
+  { 'elem':'Ag15-', 'ort':'111', 'bands':[100,75], 'flds':[0.0, 0.1], 'shift':4, 'slablmt':[0,-1],},
+  { 'elem':'Ag-bulk', 'ort':'111', 'bands':[60,30], 'flds':[0.0, 0.1] , 'shift':0, 'slablmt':[0,-1],},
+  { 'elem':'Ag', 'ort':'100', 'bands':[60,35], 'flds':[0.0, 0.1] , 'shift':0, 'slablmt':[0,-1],},
+  { 'elem':'Ag', 'ort':'110', 'bands':[60,35], 'flds':[0.0, 0.1], 'shift':0, 'slablmt':[0,-1], },
+  { 'elem':'Pt', 'ort':'111', 'bands':[60,35], 'flds':[0.0, 0.1], 'shift':0, 'slablmt':[0,-1], },
+#  { 'elem':'Pt-H', 'ort':'111', 'bands':[60,35], 'flds':[0.0, 0.1], 'shift':1, 'slablmt':[0,-1], },
+  { 'elem':'Pt-H-Sym', 'ort':'111', 'bands':[60,35], 'flds':[0.0, 0.1], 'shift':1, 'slablmt':[1,-1], },
+  { 'elem':'Pt15-H-Sym', 'ort':'111', 'bands':[100,75], 'flds':[0.0, 0.1], 'shift':1, 'slablmt':[1,-2], },
+#  { 'elem':'Pt', 'ort':'100', 'bands':[60,35], 'flds':[0.0, 0.1], 'shift':0, 'slablmt':[0,-1], },
+#  { 'elem':'Pt', 'ort':'110', 'bands':[60,35], 'flds':[0.0, 0.1], 'shift':0, 'slablmt':[0,-1], },
+  { 'elem':'Au', 'ort':'111', 'bands':[60,35], 'flds':[0.0, 0.1], 'shift':0, 'slablmt':[0,-1], },
+  { 'elem':'Au', 'ort':'100', 'bands':[60,35], 'flds':[0.0, 0.1], 'shift':0, 'slablmt':[0,-1], },
+  { 'elem':'Au', 'ort':'110', 'bands':[60,35], 'flds':[0.0, 0.1], 'shift':0, 'slablmt':[0,-1], },
            ]
 
-readinlist = [item for item in slablist if item['ort']=='111' ]
-#readinlist = [item for item in slablist if item['elem']=='Ag' ]
+#readinlist = [ item for item in slablist if item['ort']=='111' ]
+readinlist = [item for item in slablist if item['elem'][0:2]=='Pt' ]
 plotxlim = [-20., 5.]
 colorlist = ('b', 'g', 'r', 'c', 'm', 'y', 'k')
 labelfontsize = 30
@@ -64,22 +67,12 @@ for slabdict in readinlist:
     # get data
     slab = SlabFreeChrg(slabdict)
     # shift to align
-    if slab.elem=='Pt-H':
-        slab.zshift_layer(1)
-    elif slab.elem=='Pt-H-Sym':
-        slab.zshift_layer(1)
-    else:
-        slab.zshift_layer(0)
+    slab.zshift_layer()
     print('atomic layers', slab.zatom)
     slab.set_chrgz_fld()
     slab.set_flddiff()
     # compute the imageplane for different center reference
-    if slab.elem=='Pt-H':
-        slab.set_imgplane([1,-1])
-    if slab.elem=='Pt-H-Sym':
-        slab.set_imgplane([1,-2])
-    else:
-        slab.set_imgplane([0,-1])
+    slab.set_imgplane()
     imgplane_list.append(slab.imgplane)
     # write data file
     slab.wrtdata()
