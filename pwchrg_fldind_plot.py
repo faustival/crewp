@@ -23,11 +23,12 @@ Data from class SlabFreeChrg:
 rootpath = '/home/jinxi/pwjobs/'
 os.chdir(rootpath)
 slablist = [
+  { 'elem':'Ag-bulk', 'ort':'111', 'bands':[60,30], 'flds':[0.0, 0.1] , 'shift':0, 'slablmt':[0,-1],},
   { 'elem':'Ag',    'ort':'111', 'bands':[60,35], 'flds':[0.0, 0.1], 'shift':0, 'slablmt':[0,-1],},
   { 'elem':'Ag15-', 'ort':'111', 'bands':[100,75], 'flds':[0.0, 0.1], 'shift':4, 'slablmt':[0,-1],},
-  { 'elem':'Ag-bulk', 'ort':'111', 'bands':[60,30], 'flds':[0.0, 0.1] , 'shift':0, 'slablmt':[0,-1],},
-  { 'elem':'Ag', 'ort':'100', 'bands':[60,35], 'flds':[0.0, 0.1] , 'shift':0, 'slablmt':[0,-1],},
-  { 'elem':'Ag', 'ort':'110', 'bands':[60,35], 'flds':[0.0, 0.1], 'shift':0, 'slablmt':[0,-1], },
+  { 'elem':'Ag21-', 'ort':'111', 'bands':[130,105], 'flds':[0.0, 0.1], 'shift':7, 'slablmt':[0,-1],},
+#  { 'elem':'Ag', 'ort':'100', 'bands':[60,35], 'flds':[0.0, 0.1] , 'shift':0, 'slablmt':[0,-1],},
+#  { 'elem':'Ag', 'ort':'110', 'bands':[60,35], 'flds':[0.0, 0.1], 'shift':0, 'slablmt':[0,-1], },
   { 'elem':'Pt', 'ort':'111', 'bands':[60,35], 'flds':[0.0, 0.1], 'shift':0, 'slablmt':[0,-1], },
 #  { 'elem':'Pt-H', 'ort':'111', 'bands':[60,35], 'flds':[0.0, 0.1], 'shift':1, 'slablmt':[0,-1], },
   { 'elem':'Pt-H-Sym', 'ort':'111', 'bands':[60,35], 'flds':[0.0, 0.1], 'shift':1, 'slablmt':[1,-1], },
@@ -40,8 +41,8 @@ slablist = [
            ]
 
 #readinlist = [ item for item in slablist if item['ort']=='111' ]
-readinlist = [item for item in slablist if item['elem'][0:2]=='Pt' ]
-plotxlim = [-20., 5.]
+readinlist = [item for item in slablist if item['elem'][0:2]=='Ag' ]
+plotxlim = [-40., 25.]
 colorlist = ('b', 'g', 'r', 'c', 'm', 'y', 'k')
 labelfontsize = 30
 
@@ -71,6 +72,7 @@ for slabdict in readinlist:
     print('atomic layers', slab.zatom)
     slab.set_chrgz_fld()
     slab.set_flddiff()
+    # compute for bulk density
     # compute the imageplane for different center reference
     slab.set_imgplane()
     imgplane_list.append(slab.imgplane)
