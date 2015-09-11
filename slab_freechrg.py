@@ -19,6 +19,8 @@ class SlabFreeChrg:
                   [total, d, free], # 1st field
                   ...
                  ]
+
+    self.freeratio = [ 0.0_field, 1st_field, ... ]
         
     self.chrgz_diffld = [
                   [total, d, free], # 1st field
@@ -40,8 +42,10 @@ class SlabFreeChrg:
         # get info from 0-field charge output
         inpf = self.inpfname(self.bands[0], 0.0)
         slabinit = PlotIORead(inpf, 'ang')
+        self.cell = slabinit.cell
         slabinfo = ChrgAvgZ(slabinit.ary3d, slabinit.cell)
         atom_coord = slabinit.atom_coord
+        self.xyarea = slabinfo.xyarea()
         # z-shift dependent variables
         self.zatom = slabinfo.zatompos(atom_coord)
         self.zaxis = slabinfo.zgrid()
@@ -100,6 +104,15 @@ class SlabFreeChrg:
         int_rho = simps(chrgind_var, zaxis_var)
         z0 = int_zrho/int_rho
         return z0
+    
+    def get_bulkfreeden(self):
+        '''
+        compute bulk free charge density with total charge
+        NOTE only useful if system has no vacuum layer, i.e. bulk
+        '''
+        self.int_freechrg = simps(self.chrgz[0][2], self.zaxis)*self.xyarea
+        self.cellvol = self.xyarea*self.cell[2,2]
+        self.bulkfreeden = self.int_freechrg/self.cellvol
 
     def set_chrgz_fld(self):
         '''
@@ -117,6 +130,14 @@ class SlabFreeChrg:
         for i in range(1,len(self.flds)):
             chrgz_diffld = [ (self.chrgz[i][j] - self.chrgz[0][j]) for j in range(0,3) ] 
             self.chrgz_diffld.append(chrgz_diffld)
+
+    def set_freeratio(self, bulkden):
+        '''
+        compute rhoz(free)/bulkden
+        '''
+        self.freeratio = []
+        for [total, d, free] in self.chrgz:
+            self.freeratio.append(free/bulkden)
 
     def set_imgplane(self):
         '''
@@ -141,6 +162,16 @@ class SlabFreeChrg:
                        '_ncpp.dat' 
             headtag = ' zaxis    full_valence     d-valence     free-valence  '
             np.savetxt(datfname, np.column_stack(data), header=headtag)
+
+    def wrtratio(self):
+        data = tuple( [self.zaxis] + self.freeratio )
+        datfname = self.elem.lower() + \
+                   self.ort + \
+                   'chrgratio' + \
+                   '_ncpp.dat' 
+        fieldstrlist = ['f_'+str(field) for field in self.flds]
+        headtag = ' zaxis '  + '  '.join(fieldstrlist) 
+        np.savetxt(datfname, np.column_stack(data), header=headtag)
 
 
 
