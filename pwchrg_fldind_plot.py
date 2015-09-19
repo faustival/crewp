@@ -27,21 +27,22 @@ rootpath = '/home/jinxi/pwjobs/'
 os.chdir(rootpath)
 
 bulklist = [
-  { 'elem':'Ag-bulk', 'ort':'111', 'bands':[60,30], 'flds':[0.0, 0.1] , 'shift':0, 'slablmt':[0,-1],},
+#  { 'elem':'Ag-bulk', 'ort':'111', 'bands':[60,30], 'flds':[0.0, 0.1] , 'shift':0, 'slablmt':[0,-1],},
         ]
 
 slablist = [
-  { 'elem':'Ag',    'ort':'111', 'bands':[60,35], 'flds':[0.0, 0.1], 'shift':0, 'slablmt':[0,-1],},
-  { 'elem':'Ag', 'ort':'100', 'bands':[60,35], 'flds':[0.0, 0.1] , 'shift':0, 'slablmt':[0,-1],},
-  { 'elem':'Ag', 'ort':'110', 'bands':[60,35], 'flds':[0.0, 0.1], 'shift':0, 'slablmt':[0,-1], },
+  { 'elem':'Rb',  'ort':'111', 'bands':[10,5], 'flds':[0.0, 0.1], 'shift':0, 'slablmt':[0,-1],},
+  { 'elem':'Ag',  'ort':'111', 'bands':[60,35], 'flds':[0.0, 0.1], 'shift':0, 'slablmt':[0,-1],},
+#  { 'elem':'Ag', 'ort':'100', 'bands':[60,35], 'flds':[0.0, 0.1] , 'shift':0, 'slablmt':[0,-1],},
+#  { 'elem':'Ag', 'ort':'110', 'bands':[60,35], 'flds':[0.0, 0.1], 'shift':0, 'slablmt':[0,-1], },
   { 'elem':'Pt', 'ort':'111', 'bands':[60,35], 'flds':[0.0, 0.1], 'shift':0, 'slablmt':[0,-1], },
   { 'elem':'Pt', 'ort':'100', 'bands':[60,35], 'flds':[0.0, 0.1], 'shift':0, 'slablmt':[0,-1], },
   { 'elem':'Pt', 'ort':'110', 'bands':[60,35], 'flds':[0.0, 0.1], 'shift':0, 'slablmt':[0,-1], },
   { 'elem':'Au', 'ort':'111', 'bands':[60,35], 'flds':[0.0, 0.1], 'shift':0, 'slablmt':[0,-1], },
   { 'elem':'Au', 'ort':'100', 'bands':[60,35], 'flds':[0.0, 0.1], 'shift':0, 'slablmt':[0,-1], },
   { 'elem':'Au', 'ort':'110', 'bands':[60,35], 'flds':[0.0, 0.1], 'shift':0, 'slablmt':[0,-1], },
-#  { 'elem':'Ag15-', 'ort':'111', 'bands':[100,75], 'flds':[0.0, 0.1], 'shift':4, 'slablmt':[0,-1],},
-#  { 'elem':'Ag21-', 'ort':'111', 'bands':[130,105], 'flds':[0.0, 0.1], 'shift':7, 'slablmt':[0,-1],},
+  { 'elem':'Ag15-', 'ort':'111', 'bands':[100,75], 'flds':[0.0, 0.1], 'shift':4, 'slablmt':[0,-1],},
+  { 'elem':'Ag21-', 'ort':'111', 'bands':[130,105], 'flds':[0.0, 0.1], 'shift':7, 'slablmt':[0,-1],},
 #  { 'elem':'Pt-H', 'ort':'111', 'bands':[60,35], 'flds':[0.0, 0.1], 'shift':1, 'slablmt':[0,-1], },
 #  { 'elem':'Pt-H-Sym', 'ort':'111', 'bands':[60,35], 'flds':[0.0, 0.1], 'shift':1, 'slablmt':[1,-1], },
 #  { 'elem':'Pt15-H-Sym', 'ort':'111', 'bands':[100,75], 'flds':[0.0, 0.1], 'shift':1, 'slablmt':[1,-2], },
@@ -49,7 +50,7 @@ slablist = [
 
 
 #readinlist = [ item for item in slablist if item['ort']=='111' ]
-readinlist = [item for item in slablist if item['elem'][0:2]=='Ag' ]
+readinlist = [item for item in slablist if item['elem'][0:2]=='Rb' ]
 plotxlim = [-40., 25.]
 colorlist = ('b', 'g', 'r', 'c', 'm', 'y', 'k')
 labelfontsize = 30
@@ -85,13 +86,15 @@ for slabdict in readinlist:
         if bulk.elem[:2]==slab.elem[:2]:
             bulkden = bulk.bulkfreeden
     # compute free_charge/bulkden ratio
-    slab.set_freeratio(bulkden)
+    if bulklist:
+        slab.set_freeratio(bulkden)
     # compute the imageplane for different center reference
     slab.set_imgplane()
     imgplane_list.append(slab.imgplane)
     # write data file
     slab.wrtdata()
-    slab.wrtratio()
+    if bulklist:
+        slab.wrtratio()
     slab_plotlist.append(slab)
 
 slab_plotlist += bulk_plotlist
@@ -127,8 +130,9 @@ for slab in slab_plotlist:
     ax_nofld_free.plot(slab.zaxis, slab.chrgz[0][2], color=color, label=legend_pref+' Free')
     if slab.elem[-4:]=='bulk':
         continue
-    ax_freeratio.plot(slab.zaxis, slab.freeratio[0], color=color, label=legend_pref+' Free, density ratio')
-    ax_freeratio.plot(slab.zaxis, slab.freeratio[1], color=color, linestyle='--', dashes=(5,1.5), label=legend_pref+' Free, density ratio, field')
+    if bulklist:
+        ax_freeratio.plot(slab.zaxis, slab.freeratio[0], color=color, label=legend_pref+' Free, density ratio')
+        ax_freeratio.plot(slab.zaxis, slab.freeratio[1], color=color, linestyle='--', dashes=(5,1.5), label=legend_pref+' Free, density ratio, field')
     # 
     ax_diff_tot.plot(slab.zaxis, -slab.chrgz_diffld[0][0], color=color, label=legend_pref+' Total')
     ax_diff_free.plot(slab.zaxis, -slab.chrgz_diffld[0][1], color=color, linestyle='--', dashes=(5,1.5), label=legend_pref+' $d$')
