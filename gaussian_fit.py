@@ -4,6 +4,11 @@ import numpy as np
 from scipy.optimize import leastsq
 import matplotlib.pyplot as plt
 
+'''
+See the example of least-square fitting,
+http://docs.scipy.org/doc/scipy/reference/tutorial/optimize.html
+'''
+
 def del_nan(x, y):
     matxy = np.array((x,y)).transpose()
     matxy = matxy[~np.isnan(matxy).any(axis=1)]
@@ -39,7 +44,7 @@ def sumgaus0(par, x):
     return sumgaus
 
 def residues(par, y, x):
-    print(par)
+    #print(par)
     gaussum = sumgaus0(par, x)
     err = y - gaussum
     return err
@@ -60,13 +65,14 @@ guess = [
         ]
 
 guess0 = [ 
-         [50000., 30., 3300.], 
-         [10000., 30., 3500.], 
-         [40.]
-        ]
+          [10000., 30., 3200.], 
+          [50000., 30., 3350.], 
+          [10000., 30., 3500.], 
+          [40.]
+         ]
 
 # load data
-x, y, x1, y1 = np.genfromtxt('/home/jinxi/au_h2o_sers.dat', delimiter=",", unpack=True, usecols=range(4)) 
+x, y, x1, y1 = np.genfromtxt('/home/jinxi/anyon_datastore/h2o_tms/au_h2o_sers.dat', delimiter=",", unpack=True, usecols=range(4)) 
 # delete 'NaN' rows
 x, y = del_nan(x, y)
 # shift y with minimum
@@ -80,7 +86,7 @@ print(par0)
 print(parout)
 
 plt.plot(x, y,  label='Experiment', color='blue')
-#plt.plot(x, sumgaus0(par0,x),  label='Initial')
+plt.plot(x, sumgaus0(par0,x),  label='Initial')
 plt.plot(x, sumgaus0(parout[0],x),  label='Optimized', color='red', linewidth=2.)
 parplot = parout[0]
 colorlist = ('g', 'c', 'm', 'y')
