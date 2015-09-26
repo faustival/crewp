@@ -20,6 +20,11 @@ Define the initial guess of gaussian function parameters as:
                ...
                [offset]
              ]
+
+Call the fitting as, 
+
+    par0 = reorgpar(guess)
+    fitoup = leastsq(residues, par0, args=(spectrum.y, spectrum.x))
 '''
 
 def reorgpar(inp):
@@ -58,8 +63,15 @@ class Spectrum:
     def gausfit(self, guess):
         '''
         fit Gaussian functions
+        Output:
+        =======
+        self.y_gfit_guess : peak computed with initial guess parameters
+        self.y            : shifted to fitted baseline
+        self.y_gfit_sum   : fitted peak sum, shifted baseline to 0
+        self.y_gfit_peaks : fitted peaks list, shifted baseline to 0
         '''
         self.gfit_guess = guess
+        self.y -= min(self.y)
         par0 = reorgpar(self.gfit_guess)
         fitoup = leastsq(residues, par0, args=(self.y, self.x))
         parout = fitoup[0]
@@ -68,22 +80,39 @@ class Spectrum:
         for i in range(0,len(parout)//3):
             self.gfit_oup.append( list( parout[3*i:3*(i+1)] ) )
         self.gfit_oup.append( [ parout[-1] ] )
-
-    def plotfit(self):
-        self.fig_gausfit = plt.figure()
-        ax_gfit = self.fig_gausfit.add_subplot(1,1,1)
-        ax_gfit.plot(self.x, self.y,  label='Experiment', color='blue')
-        ax_gfit.plot(self.x, sumgaus( reorgpar(self.gfit_guess), self.x ),  label='Initial')
-        ax_gfit.plot(self.x, sumgaus( reorgpar(self.gfit_oup), self.x ),  label='Optimized', color='red', linewidth=2.)
-        colorlist = ('g', 'c', 'm', 'y')
-        counter = -1
+        # compute for the estimated and fitted spectra
+        self.y_gfit_sum = sumgaus( reorgpar(self.gfit_oup), self.x )
+        self.y_gfit_peaks = []
         for i in range(0,len(self.gfit_oup)-1):
-            counter += 1
-            color = colorlist[counter % len(colorlist)]
             amp, width, center = self.gfit_oup[i]
             [offset] = self.gfit_oup[-1]
-            plotiso = gaussian(self.x, amp, width, center) + offset
-            ax_gfit.plot(self.x, plotiso,  label='Optimized peak %d'%i, color=color, linestyle='--', dashes=(5,1.5), linewidth=1.5)
+            peak = gaussian(self.x, amp, width, center) + offset
+            self.y_gfit_peaks.append(peak)
+        self.y_gfit_guess = sumgaus( reorgpar(self.gfit_guess), self.x )
+        # shift fitted baseline to 0
+        [off] = self.gfit_oup[-1]
+        self.offsetall(-off)
+
+    def offsetall(self, offset):
+        '''
+        shift off spectrum 
+        '''
+        self.y_gfit_guess += offset
+        self.y += offset
+        self.y_gfit_sum += offset
+        for peak in self.y_gfit_peaks:
+            peak += offset
+
+    def plot_gfit(self, ax_gfit):
+        ax_gfit.plot(self.x, self.y,  label='Experiment', color='blue')
+        #ax_gfit.plot(self.x, self.y_gfit_guess, label='Initial', color='black')
+        ax_gfit.plot(self.x, self.y_gfit_sum, label='Optimized', color='red', linewidth=2.)
+        colorlist = ('g', 'c', 'm', 'y')
+        counter = -1
+        for peak in self.y_gfit_peaks:
+            counter += 1
+            color = colorlist[counter % len(colorlist)]
+            ax_gfit.plot(self.x, peak, label='Optimized peak %d'%(counter+1), color=color, linestyle='--', dashes=(5,1.5), linewidth=1.5)
         ax_gfit.legend()
 
 

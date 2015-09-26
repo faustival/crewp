@@ -48,11 +48,20 @@ class PeakVar:
             self.spectra[self.taglist[i]] = Spectrum(colxy[0], colxy[1])
 
     def fitgauss(self, gaus_guess):
-        for key in gaus_guess:
-            self.spectra[key].gausfit(gaus_guess[key])
+        self.gfit_guess = gaus_guess
+        for key in sorted(self.gfit_guess.keys()):
+            self.spectra[key].gausfit(self.gfit_guess[key])
+            print(key, self.spectra[key].gfit_oup)
 
-
-
+    def plotgfit(self, off_iter):
+        self.fig_gausfit = plt.figure()
+        ax_gfit = self.fig_gausfit.add_subplot(1,1,1)
+        off = -off_iter
+        for key in sorted(self.gfit_guess.keys()):
+            off += off_iter
+            self.spectra[key].offsetall(off)
+            self.spectra[key].plot_gfit(ax_gfit)
+            self.spectra[key].offsetall(-off)
 
 
 
