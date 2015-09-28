@@ -61,6 +61,9 @@ class PeakVar:
             off += off_iter
             self.spectra[key].offsetall(off)
             self.spectra[key].plot_gfit(ax_gfit)
+            ax_gfit.text( min(self.spectra[key].x)-60., min(self.spectra[key].y), '%.2f V' % (float(key)) , 
+                        horizontalalignment='center',
+                        verticalalignment='bottom')
             self.spectra[key].offsetall(-off)
 
 
