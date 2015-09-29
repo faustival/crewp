@@ -90,17 +90,20 @@ class Spectrum:
             peak = gaussian(self.x, amp, width, center) + offset
             peakmax = amp/np.sqrt(2.*np.pi)/width + offset
             self.gfit_peak_pos.append( np.array((center, peakmax)) )
-            print(self.gfit_peak_pos)
             self.y_gfit_peaks.append(peak)
         self.y_gfit_guess = sumgaus( reorgpar(self.gfit_guess), self.x )
         # shift fitted baseline to 0
         [off] = self.gfit_oup[-1]
         self.offsetall(-off)
+        # set attr. offsetval to record offset from Gaussian fitted 0 baseline
+        self.offsetval = 0.
 
     def offsetall(self, offset):
         '''
         shift off spectrum (all y-related quantities)
         '''
+        if hasattr(self, 'offsetval'):
+            self.offsetval += offset
         self.y_gfit_guess += offset
         self.y += offset
         self.y_gfit_sum += offset
@@ -121,7 +124,8 @@ class Spectrum:
             # the separated peak lines
             ax_gfit.plot(self.x, peak, label='Optimized peak %d'%(counter+1), color=color, linestyle='--', dashes=(5,1.5), linewidth=1.5)
             # label peaks
-            ax_gfit.text( self.gfit_peak_pos[counter][0], self.gfit_peak_pos[counter][1], '%.2f' % (self.gfit_peak_pos[counter][0]), 
+            peakcoord = self.gfit_peak_pos[counter]
+            ax_gfit.text( peakcoord[0], peakcoord[1], '%.2f, %.2f' % (peakcoord[0], peakcoord[1]-self.offsetval), 
                         horizontalalignment='center',
                         verticalalignment='bottom')
         peaksdot = np.array(self.gfit_peak_pos).transpose()
