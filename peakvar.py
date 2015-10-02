@@ -48,9 +48,14 @@ class PeakVar:
             self.spectra[self.taglist[i]] = Spectrum(colxy[0], colxy[1])
 
     def fitgauss(self, gaus_guess):
+        '''
+        fit for every
+        '''
         self.gfit_guess = gaus_guess
+        #self.gfit_voltlist = 
         for key in sorted(self.gfit_guess.keys()):
             self.spectra[key].gausfit(self.gfit_guess[key])
+            #self.s
             print(key, self.spectra[key].gfit_oup)
 
     def plotgfit(self, off_iter):
@@ -65,6 +70,14 @@ class PeakVar:
                         horizontalalignment='center',
                         verticalalignment='bottom')
             self.spectra[key].offsetall(-off)
+
+    def stark(self):
+        '''
+        Linear regression of Stark slope from Gaussian fitted 
+        spectroscopy
+        '''
+        pass
+        #for key in sorted(self.gfit_guess.keys()):
 
 
 

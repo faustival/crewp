@@ -65,10 +65,12 @@ class Spectrum:
         fit Gaussian functions
         Output:
         =======
-        self.y_gfit_guess : peak computed with initial guess parameters
-        self.y            : shifted to fitted baseline
-        self.y_gfit_sum   : fitted peak sum, shifted baseline to 0
-        self.y_gfit_peaks : fitted peaks list, shifted baseline to 0
+        self.y_gfit_guess  : peak computed with initial guess parameters
+        self.y             : shifted to fitted baseline
+        self.y_gfit_sum    : fitted peak sum, shifted baseline to 0
+        self.y_gfit_peaks  : fitted peaks list, shifted baseline to 0
+        self.gfit_peak_pos : fitted peak position, 
+                             [ np.array(peak_position_1, peak_height_1), ...]
         '''
         self.gfit_guess = guess
         self.y -= min(self.y)
