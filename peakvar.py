@@ -49,14 +49,20 @@ class PeakVar:
 
     def fitgauss(self, gaus_guess):
         '''
-        fit for every
+        fit for each spectra 
         '''
         self.gfit_guess = gaus_guess
-        #self.gfit_voltlist = 
+        self.voltvar = []
+        self.peakvar = []
         for key in sorted(self.gfit_guess.keys()):
-            self.spectra[key].gausfit(self.gfit_guess[key])
-            #self.s
+            spectrum = self.spectra[key]
+            self.voltvar.append(float(key))
+            spectrum.gausfit(self.gfit_guess[key])
+            freqary = [ peak[0] for peak in spectrum.gfit_peak_pos ] 
+            self.peakvar.append(freqary) 
             print(key, self.spectra[key].gfit_oup)
+        self.voltvar = np.array(self.voltvar)
+        self.peakvar = np.array(self.peakvar).transpose()
 
     def plotgfit(self, off_iter):
         self.fig_gausfit = plt.figure()
@@ -71,7 +77,13 @@ class PeakVar:
                         verticalalignment='bottom')
             self.spectra[key].offsetall(-off)
 
-    def stark(self):
+    def plotfreqvar(self):
+        self.fig_freqvar = plt.figure()
+        ax_freqvar = self.fig_freqvar.add_subplot(1,1,1)
+        for i in range(0,self.peakvar.shape[0]):
+            ax_freqvar.plot(self.voltvar, self.peakvar[i])#,  label='Experiment', color='blue')
+
+    def freqvar(self):
         '''
         Linear regression of Stark slope from Gaussian fitted 
         spectroscopy

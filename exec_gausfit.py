@@ -57,6 +57,7 @@ gaus_guess =  {
 ecsers = PeakVar(inpfname, taglist)
 ecsers.fitgauss(gaus_guess)
 ecsers.plotgfit(plot_gfit_off_iter)
+ecsers.plotfreqvar()
 
 plt.show()
 
