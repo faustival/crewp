@@ -48,6 +48,18 @@ class PeakVar:
             # add i-th spectra instance to self.spectra{}
             self.spectra[self.taglist[i]] = Spectrum(colxy[0], colxy[1])
 
+    def plotall(self):
+        '''
+        only plot experimental spectral lines
+        to check the data loading
+        '''
+        self.fig_allspectra = plt.figure()
+        ax_allspectra = self.fig_allspectra.add_subplot(1,1,1)
+        for key in sorted(self.spectra.keys(), key=lambda val: float(val)):
+            spectrum_data = self.spectra[key]
+            ax_allspectra.plot(spectrum_data.x, spectrum_data.y, label=(key+' V'))
+        ax_allspectra.legend()
+
     def fitgauss(self, gaus_guess):
         '''
         fit for each spectra 
@@ -62,7 +74,7 @@ class PeakVar:
         self.gfit_guess = gaus_guess
         self.keyvar = []
         self.freqvar = []
-        for key in sorted(self.gfit_guess.keys()):
+        for key in sorted(self.gfit_guess.keys(), key=lambda val: float(val)):
             spectrum = self.spectra[key]
             self.keyvar.append(float(key))
             spectrum.gausfit(self.gfit_guess[key])
@@ -76,7 +88,7 @@ class PeakVar:
         self.fig_gausfit = plt.figure()
         ax_gfit = self.fig_gausfit.add_subplot(1,1,1)
         off = -off_iter
-        for key in sorted(self.gfit_guess.keys()):
+        for key in sorted( self.gfit_guess.keys(), key=lambda val: float(val) ):
             off += off_iter
             self.spectra[key].offsetall(off)
             self.spectra[key].plot_gfit(ax_gfit)

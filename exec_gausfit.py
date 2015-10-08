@@ -6,8 +6,9 @@ import sys
 from peakvar import PeakVar
 
 # define tag of all columns (e. g. potentials in EC-SERS)
-inpfname = '/home/jinxi/anyon_datastore/h2o_tms/au_h2o_sers.dat'
+inpfname = '/home/jinxi/anyon_datastore/h2o_tms/au_h2o_sers.csv'
 taglist = [-2.0, -1.6, -1.2, -0.8, -0.4, 0.0, 0.4, 0.8]
+#taglist = [-2.0, -1.8, -1.6, -1.4, -1.2, -1.0]
 taglist = [ '{:.1f}'.format(tag) for tag in taglist ]
 plot_gfit_off_iter = 1000.
 
@@ -20,14 +21,13 @@ plot_gfit_off_iter = 1000.
                [offset]
              ]
 '''
-gaus_guess =  { 
+gaus_guess_au =  { 
                 "-2.0": [ 
                           [10000., 30., 3200.], 
                           [50000., 30., 3350.], 
                           [10000., 30., 3500.], 
                           [60.]
                         ], 
-
                 "-1.6": [ 
                         [48046.61, 77.5, 3195.6], 
                         [237888.1, 99.7, 3357.4], 
@@ -55,8 +55,10 @@ gaus_guess =  {
               }
 
 ecsers = PeakVar(inpfname, taglist)
+# plot all loaded spectra to check the data
+ecsers.plotall()
 # fit Gaussian peaks and plot
-ecsers.fitgauss(gaus_guess)
+ecsers.fitgauss(gaus_guess_au)
 ecsers.plotgfit(plot_gfit_off_iter)
 # linear regression of fitted frequencies and plot
 ecsers.peak_linreg()
