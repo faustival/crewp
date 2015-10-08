@@ -3,6 +3,7 @@
 import sys
 import numpy as np
 from scipy.optimize import leastsq
+from scipy import stats
 import matplotlib.pyplot as plt
 from spectrum import Spectrum
 
@@ -50,19 +51,26 @@ class PeakVar:
     def fitgauss(self, gaus_guess):
         '''
         fit for each spectra 
+        Gaussian fitted peak variation 
+        OUTPUT
+        ======
+        self.keyvar = np.array( [ key1, key2, ... ] )
+        self.freqvar = np.array( [ freq_array_of_1st_peak[ key1, key2, ... ] ]
+                                 [ freq_array_of_2st_peak[ key1, key2, ... ] ] 
+                                 ... )
         '''
         self.gfit_guess = gaus_guess
-        self.voltvar = []
-        self.peakvar = []
+        self.keyvar = []
+        self.freqvar = []
         for key in sorted(self.gfit_guess.keys()):
             spectrum = self.spectra[key]
-            self.voltvar.append(float(key))
+            self.keyvar.append(float(key))
             spectrum.gausfit(self.gfit_guess[key])
             freqary = [ peak[0] for peak in spectrum.gfit_peak_pos ] 
-            self.peakvar.append(freqary) 
+            self.freqvar.append(freqary) 
             print(key, self.spectra[key].gfit_oup)
-        self.voltvar = np.array(self.voltvar)
-        self.peakvar = np.array(self.peakvar).transpose()
+        self.keyvar = np.array(self.keyvar)
+        self.freqvar = np.array(self.freqvar).transpose()
 
     def plotgfit(self, off_iter):
         self.fig_gausfit = plt.figure()
@@ -77,19 +85,46 @@ class PeakVar:
                         verticalalignment='bottom')
             self.spectra[key].offsetall(-off)
 
+    def peak_linreg(self):
+        '''
+        linear regression results for peak variations:
+        INPUT
+        =====
+        self.keyvar = np.array( [ key1, key2, ... ] )
+        self.freqvar = np.array( [ freq_array_of_1st_peak[ key1, key2, ... ] ]
+                                 [ freq_array_of_2st_peak[ key1, key2, ... ] ] 
+                                 ... )
+        OUTPUT
+        ======
+        self.linreg_oup = [ 
+                            [ slope_1, intercept_1, r_value_1 ] 
+                            [ slope_2, intercept_2, r_value_2 ] 
+                            ...
+                          ]
+        self.linreg_line = [ slope_1 * self.keyvar + intercept_1 ,
+                             slope_2 * self.keyvar + intercept_2 ,
+                             ...
+        '''
+        self.linreg_oup = []
+        self.linreg_line = []
+        for i in range(0,self.freqvar.shape[0]):
+            linreg_oup = stats.linregress(self.keyvar, self.freqvar[i])
+            slope, intercept, r_value, p_value, std_err = linreg_oup
+            self.linreg_oup.append([slope, intercept, r_value])
+            self.linreg_line.append( slope * self.keyvar + intercept )
+        print(self.linreg_oup)
+
     def plotfreqvar(self):
         self.fig_freqvar = plt.figure()
         ax_freqvar = self.fig_freqvar.add_subplot(1,1,1)
-        for i in range(0,self.peakvar.shape[0]):
-            ax_freqvar.plot(self.voltvar, self.peakvar[i])#,  label='Experiment', color='blue')
+        colorlist = ('r', 'b', 'g', 'c', 'm', 'y')
+        counter = -1
+        for i in range(0,self.freqvar.shape[0]):
+            counter += 1
+            color = colorlist[counter % len(colorlist)]
+            ax_freqvar.plot(self.keyvar, self.freqvar[i], 'ro', color=color)
+            ax_freqvar.plot(self.keyvar, self.linreg_line[i], color=color)
 
-    def freqvar(self):
-        '''
-        Linear regression of Stark slope from Gaussian fitted 
-        spectroscopy
-        '''
-        pass
-        #for key in sorted(self.gfit_guess.keys()):
 
 
 

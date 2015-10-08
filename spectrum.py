@@ -75,8 +75,10 @@ class Spectrum:
         self.gfit_guess = guess
         self.y -= min(self.y)
         par0 = reorgpar(self.gfit_guess)
-        fitoup = leastsq(residues, par0, args=(self.y, self.x))
+        fitoup = leastsq(residues, par0, args=(self.y, self.x), full_output=0)
         parout = fitoup[0]
+        #otheroup = fitoup[1:]
+        #print(otheroup)
         # reform the fitting output parameters like the input
         self.gfit_oup = []
         for i in range(0,len(parout)//3):
@@ -116,7 +118,7 @@ class Spectrum:
 
     def plot_gfit(self, ax_gfit):
         ax_gfit.plot(self.x, self.y,  label='Experiment', color='blue')
-        #ax_gfit.plot(self.x, self.y_gfit_guess, label='Initial', color='black')
+        ax_gfit.plot(self.x, self.y_gfit_guess, label='Initial', color='black')
         ax_gfit.plot(self.x, self.y_gfit_sum, label='Optimized', color='red', linewidth=2.)
         colorlist = ('g', 'c', 'm', 'y')
         counter = -1
