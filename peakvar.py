@@ -84,19 +84,6 @@ class PeakVar:
         self.keyvar = np.array(self.keyvar)
         self.freqvar = np.array(self.freqvar).transpose()
 
-    def plotgfit(self, off_iter):
-        self.fig_gausfit = plt.figure()
-        ax_gfit = self.fig_gausfit.add_subplot(1,1,1)
-        off = -off_iter
-        for key in sorted( self.gfit_guess.keys(), key=lambda val: float(val) ):
-            off += off_iter
-            self.spectra[key].offsetall(off)
-            self.spectra[key].plot_gfit(ax_gfit)
-            ax_gfit.text( min(self.spectra[key].x)-60., min(self.spectra[key].y), '%.2f V' % (float(key)) , 
-                        horizontalalignment='center',
-                        verticalalignment='bottom')
-            self.spectra[key].offsetall(-off)
-
     def peak_linreg(self):
         '''
         linear regression results for peak variations:
@@ -126,10 +113,24 @@ class PeakVar:
             self.linreg_line.append( slope * self.keyvar + intercept )
         print(self.linreg_oup)
 
-    def plotfreqvar(self):
-        self.fig_freqvar = plt.figure()
-        ax_freqvar = self.fig_freqvar.add_subplot(1,1,1)
-        colorlist = ('r', 'b', 'g', 'c', 'm', 'y')
+    def plotgfit(self, ax_gfit, off_iter, pltguess=True):
+        '''
+        ax_gfit  : axis container assigned to plot in
+        off_iter : offset between each variation of spectrum (spectroscopic sample condition)
+        pltguess : if True, plot the initial guessed line
+        '''
+        off = -off_iter
+        for key in sorted( self.gfit_guess.keys(), key=lambda val: float(val) ):
+            off += off_iter
+            self.spectra[key].offsetall(off)
+            self.spectra[key].plot_gfit(ax_gfit, pltguess)
+            ax_gfit.text( min(self.spectra[key].x)-60., min(self.spectra[key].y), '%.2f V' % (float(key)) , 
+                        horizontalalignment='center',
+                        verticalalignment='bottom')
+            self.spectra[key].offsetall(-off)
+
+    def plotfreqvar(self, ax_freqvar):
+        colorlist = ('g', 'c', 'm', 'y')
         counter = -1
         for i in range(0,self.freqvar.shape[0]):
             counter += 1

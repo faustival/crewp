@@ -116,10 +116,14 @@ class Spectrum:
         for peakpos in self.gfit_peak_pos:
             peakpos[1] +=offset
 
-    def plot_gfit(self, ax_gfit):
-        ax_gfit.plot(self.x, self.y,  label='Experiment', color='blue')
-        ax_gfit.plot(self.x, self.y_gfit_guess, label='Initial', color='black')
+    def plot_gfit(self, ax_gfit, pltguess=True):
+        '''
+        pltguess : if True (default), plot the initial guess spectra
+        '''
+        ax_gfit.plot(self.x, self.y, linewidth=.5, label='Experiment', color='blue')
         ax_gfit.plot(self.x, self.y_gfit_sum, label='Optimized', color='red', linewidth=2.)
+        if pltguess:
+            ax_gfit.plot(self.x, self.y_gfit_guess, label='Initial', color='black')
         colorlist = ('g', 'c', 'm', 'y')
         counter = -1
         for peak in self.y_gfit_peaks:
@@ -129,11 +133,10 @@ class Spectrum:
             ax_gfit.plot(self.x, peak, label='Optimized peak %d'%(counter+1), color=color, linestyle='--', dashes=(5,1.5), linewidth=1.5)
             # label peaks
             peakcoord = self.gfit_peak_pos[counter]
+            ax_gfit.plot(peakcoord[0], peakcoord[1], 'ro', color=color)
             ax_gfit.text( peakcoord[0], peakcoord[1], '%.2f, %.2f' % (peakcoord[0], peakcoord[1]-self.offsetval), 
                         horizontalalignment='center',
                         verticalalignment='bottom')
-        peaksdot = np.array(self.gfit_peak_pos).transpose()
-        ax_gfit.plot(peaksdot[0], peaksdot[1], 'ro')
         #ax_gfit.legend()
 
 
