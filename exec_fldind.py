@@ -31,8 +31,8 @@ bulklist = [
         ]
 
 slablist = [
-  { 'elem':'Rb', 'ort':'111', 'bands':[10,5],  'flds':[0.0, 0.1], 'shift':0, 'slablmt':[0,-1],},
-  { 'elem':'Ag', 'ort':'111', 'bands':[60,35], 'flds':[0.0, 0.01, 0.1], 'shift':0, 'slablmt':[0,-1],},
+#  { 'elem':'Rb', 'ort':'111', 'bands':[10,5],  'flds':[0.0, 0.1], 'shift':0, 'slablmt':[0,-1],},
+  { 'elem':'Ag', 'ort':'111', 'bands':[60,35], 'flds':[0.0, 0.1], 'shift':0, 'slablmt':[0,-1],},
   { 'elem':'Ag', 'ort':'100', 'bands':[60,35], 'flds':[0.0, 0.01, 0.02, 0.04, 0.06, 0.08, 0.1], 'shift':0, 'slablmt':[0,-1],},
   { 'elem':'Ag', 'ort':'110', 'bands':[60,35], 'flds':[0.0, 0.1], 'shift':0, 'slablmt':[0,-1], },
   { 'elem':'Pt', 'ort':'111', 'bands':[60,35], 'flds':[0.0, 0.1], 'shift':0, 'slablmt':[0,-1], },
@@ -49,9 +49,9 @@ slablist = [
            ]
 
 
-#readinlist = [ item for item in slablist if item['ort']=='111' ]
-readinlist = [item for item in slablist if (item['elem'][0:2]=='Ag' and item['ort']=='100') ]
-plotxlim = [0., 5.]
+readinlist = [ item for item in slablist if item['ort']=='111' ]
+#readinlist = [item for item in slablist if (item['elem'][0:2]=='Ag' and item['ort']=='100') ]
+plotxlim = [-20., 5.]
 colorlist = ('b', 'g', 'r', 'c', 'm', 'y', 'k')
 labelfontsize = 30
 
@@ -142,7 +142,7 @@ for slab in slab_plotlist:
         z0 = slab.imgplane[i]
         for ax in ax_diff:
             ax.axvline(x=z0, color=color, linewidth=1, linestyle='--')
-        counter += 1
+        #counter += 1
         color = colorlist[counter % len(colorlist)]
 # all axes
 for ax in axlist:
