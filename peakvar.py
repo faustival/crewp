@@ -2,6 +2,7 @@
 
 import sys
 import numpy as np
+np.set_printoptions(threshold=np.nan)
 from scipy.optimize import leastsq
 from scipy import stats
 import matplotlib.pyplot as plt
