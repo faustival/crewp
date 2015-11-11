@@ -3,17 +3,21 @@
 import os
 from atom import Atom
 
-slablist = [
-{ 'sys':'au3pd', 'atomlist':[[12,'Au',['d']],[13,'Pd',['d']]], },
-]
+slablist = { 'au3pd'   : [ {'atomid':12, 'elem':'Au', 'orbitals':['d','s'],},
+                           {'atomid':13, 'elem':'Pd', 'orbitals':['d'],},
+                         ],
+             'au4_top' : [ {'atomid':16, 'elem':'Au', 'orbitals':['d'],},
+                           {'atomid':17, 'elem':'C' , 'orbitals':['s','p'],},
+                         ],
+           }
 
 rootdir = '/home/jinxi/pwjobs/cyan_ads/'
 
-for slab in slablist:
-    os.chdir(rootdir + slab['sys'])
-    for atom in slab['atomlist']:
-        atm = Atom(atom[0],atom[1])
-        atm.get_ldos('plt', atom[2])
+for slabdir in slablist:
+    os.chdir(rootdir + slabdir)
+    for atom in slablist[slabdir]:
+        atm = Atom(atom['atomid'],atom['elem'])
+        atm.get_ldos('plt', atom['orbitals'], readpdos=False, spin=False)
 
 
 
