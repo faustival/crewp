@@ -63,10 +63,20 @@ class Spectrum:
     def gausfit(self, guess):
         '''
         fit Gaussian functions
+        Input:
+        ======
+        guess = [ 
+                  [amp_1, width_1, center_1],
+                  [amp_2, width_2, center_2],
+                  ...
+                  [offset]
+                ]
+        self.gfit_guess    : Pass in from ``guess``, structured guess parameters for Gaussian funcs
         Output:
         =======
         self.y_gfit_guess  : peak computed with initial guess parameters
         self.y             : shifted to fitted baseline
+        self.gfit_oup      : output parameters of Gaussian func, structured as input (guess). Print this for manual iteratively fitting.
         self.y_gfit_sum    : fitted peak sum, shifted baseline to 0
         self.y_gfit_peaks  : fitted peaks list, shifted baseline to 0
         self.gfit_peak_pos : fitted peak position, 
@@ -77,8 +87,11 @@ class Spectrum:
         par0 = reorgpar(self.gfit_guess)
         fitoup = leastsq(residues, par0, args=(self.y, self.x), full_output=0)
         parout = fitoup[0]
+        '''
+        # The following 2 line for showing other leastsq output. For test.
         #otheroup = fitoup[1:]
         #print(otheroup)
+        '''
         # reform the fitting output parameters like the input
         self.gfit_oup = []
         for i in range(0,len(parout)//3):
