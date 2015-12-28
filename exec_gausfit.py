@@ -3,8 +3,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
-from peakvar import PeakVar
-from ecsers_gfit_guesses import *
+from spectra.peakvar import PeakVar
+from spectra.ecsers_gfit_guesses import *
 
 # plot gaussian fit result
 def plot_gfit():

@@ -6,7 +6,7 @@ np.set_printoptions(threshold=np.nan)
 from scipy.optimize import leastsq
 from scipy import stats
 import matplotlib.pyplot as plt
-from spectrum import Spectrum
+from spectra.spectrum import Spectrum
 
 class PeakVar:
     '''

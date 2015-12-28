@@ -49,8 +49,8 @@ slablist = [
            ]
 
 
-readinlist = [ item for item in slablist if item['ort']=='111' ]
-#readinlist = [item for item in slablist if (item['elem'][0:2]=='Ag' and item['ort']=='100') ]
+#readinlist = [ item for item in slablist if item['ort']=='111' ]
+readinlist = [item for item in slablist if (item['elem'][0:2]=='Ag' and item['ort']=='100') ]
 plotxlim = [-20., 5.]
 colorlist = ('b', 'g', 'r', 'c', 'm', 'y', 'k')
 labelfontsize = 30

@@ -2,7 +2,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from spectrum import Spectrum
+from spectra.spectrum import Spectrum
 
 inpfname = '/home/jinxi/anyon_datastore/h2o_tms/pinge.csv'
 cols = np.genfromtxt(inpfname, delimiter=",", unpack=True) 
