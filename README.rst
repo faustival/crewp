@@ -1,2 +1,5 @@
 
-# Post- and Pre- processing (PPP) scripts
+=================================================
+Scripts processing IO of Quantum ESPRESSO package
+=================================================
+
