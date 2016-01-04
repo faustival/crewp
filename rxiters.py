@@ -17,13 +17,12 @@ class rxIters:
         with open(self.oupfname, 'r') as oupf:
             while True:
                 line = oupf.readline()
-                # search energy conv
-                rechk = re.search('!', line)
-                if rechk:
+                # search total energy conv
+                if re.search('!', line):
                     words = line.split()
                     self.enseq.append(float(words[4]))
-                rechk = re.search('Total force', line)
-                if rechk:
+                # search total force conv
+                if re.search('Total force', line):
                     words = line.split()
                     self.forcseq.append(float(words[3]))
                 if not line:
