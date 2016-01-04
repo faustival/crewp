@@ -21,6 +21,9 @@ class rxIters:
                 if re.search('!', line):
                     words = line.split()
                     self.enseq.append(float(words[4]))
+                # compute stepwise total energy diff 
+                self.endiff = [ self.enseq[i] - self.enseq[i-1] for i in range(1, len(self.enseq)) ]
+                self.endiff = [0.0] + self.endiff
                 # search total force conv
                 if re.search('Total force', line):
                     words = line.split()
