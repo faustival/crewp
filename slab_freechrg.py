@@ -2,8 +2,8 @@
 
 import numpy as np
 from scipy.integrate import simps
-from plotio_read import PlotIORead
-from chrg_avgz import ChrgAvgZ
+from qescripts.plotio_read import PlotIORead
+from qescripts.chrg_avgz import ChrgAvgZ
 
 
 class SlabFreeChrg:
@@ -66,7 +66,7 @@ class SlabFreeChrg:
     def inpfname(self, nband, field):
         inpfname = self.elem.lower() + \
                    self.ort + \
-                   'f%3.3d' %int(field*100.) + \
+                   'f%5.5d' %int(field*10000.) + \
                    '_ncpp/' + \
                    'chrgsum_' + \
                    '%3.3d' %nband
@@ -158,7 +158,7 @@ class SlabFreeChrg:
             data = tuple( [self.zaxis] + self.chrgz[i] )
             datfname = self.elem.lower() + \
                        self.ort + \
-                       'f%3.3d' %int(self.flds[i]*100.) + \
+                       'f%5.5d' %int(self.flds[i]*10000.) + \
                        '_ncpp.dat' 
             headtag = ' zaxis    full_valence     d-valence     free-valence  '
             np.savetxt(datfname, np.column_stack(data), header=headtag)
