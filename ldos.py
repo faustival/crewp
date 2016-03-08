@@ -35,9 +35,12 @@ class LDOS:
             atom['ldos'] = atm.ldos
         self.enary = self.atomlist[0]['ldos']['enary']
 
-    def plotldos(self, ax, orbital, ls):
+    def plotldos(self, ax, orbital, geo='', ls='-', lw=1., ):
         '''
         orbital = 's' / 'p' / 'd'
+        geo = 'description of system structure geometry'
+        ls : linestyle
+        lw : linewidth
         '''
         self.ax = ax
         colorlist = ('b', 'r', 'g', 'c', 'm', 'y')
@@ -45,5 +48,5 @@ class LDOS:
         for atom in self.atomlist:
             i+=1
             color = colorlist[i%len(colorlist)]
-            self.ax.plot(self.enary - self.fermi, atom['ldos'][orbital], color = color, label=atom['elem']+' '+str(atom['atomid']), linestyle=ls )
+            self.ax.plot(self.enary - self.fermi, atom['ldos'][orbital], color = color, label=geo+atom['elem']+' '+str(atom['atomid']), linestyle=ls, linewidth=lw )
 
