@@ -17,8 +17,8 @@ class PDOS:
     def __init__(self, atomlist, fermi):
         '''
         atomlist = [
-           {'atomid':13, 'elem':'Pd', 'orbitals':['d'],},
-           {'atomid':14, 'elem':'Pd', 'orbitals':['d'],},
+           {'atomid':13, 'elem':'Pd', 'orbitals':{'d':['tot','x2-y2'],},
+           {'atomid':14, 'elem':'Pd', 'orbitals':{'d':['tot','zx'],},},
                    ]
         '''
         self.atomlist = atomlist
@@ -31,11 +31,11 @@ class PDOS:
         '''
         for atom in self.atomlist:
             atm = Atom(atom['atomid'],atom['elem'])
-            atm.get_pdos('plt', atom['orbitals'], readpdos=False, spin=False)
+            atm.get_pdos('plt', atom['orbitals'], spin=False)
             atom['pdos'] = atm.pdos
         self.enary = self.atomlist[0]['pdos']['enary']
 
-    def plotpdos(self, ax, orbital, geo='', ls='-', lw=1., ):
+    def plotpdos(self, ax, orbital, angular, geo='', ls='-', lw=1., ):
         '''
         orbital = 's' / 'p' / 'd'
         geo = 'description of system structure geometry'
@@ -48,5 +48,5 @@ class PDOS:
         for atom in self.atomlist:
             i+=1
             color = colorlist[i%len(colorlist)]
-            self.ax.plot(self.enary - self.fermi, atom['pdos'][orbital], color = color, label=geo+atom['elem']+' '+str(atom['atomid']), linestyle=ls, linewidth=lw )
+            self.ax.plot(self.enary - self.fermi, atom['pdos'][orbital][angular], color = color, label=geo+atom['elem']+' '+str(atom['atomid']), linestyle=ls, linewidth=lw )
 
