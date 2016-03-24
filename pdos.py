@@ -3,15 +3,15 @@
 import numpy as np
 from qescripts.atom import Atom
 
-class LDOS:
+class PDOS:
     '''
-    processing LDOS in a single computation, i.e. system sharing same:
+    processing PDOS in a single computation, i.e. system sharing same:
     * fermi energy should be naturally the same.
     * energy array
 
     Two functions:
-    * load all LDOS in atomlist, and updated as self.atomlist[i]['ldos']
-    * plot ldos
+    * load all PDOS in atomlist, and updated as self.atomlist[i]['pdos']
+    * plot pdos
     '''
 
     def __init__(self, atomlist, fermi):
@@ -23,19 +23,19 @@ class LDOS:
         '''
         self.atomlist = atomlist
         self.fermi = fermi
-        self.getldos()
+        self.getpdos()
 
-    def getldos(self):
+    def getpdos(self):
         '''
-        self.atomlist['ldos'] was updated.
+        self.atomlist['pdos'] was updated.
         '''
         for atom in self.atomlist:
             atm = Atom(atom['atomid'],atom['elem'])
-            atm.get_ldos('plt', atom['orbitals'], readpdos=False, spin=False)
-            atom['ldos'] = atm.ldos
-        self.enary = self.atomlist[0]['ldos']['enary']
+            atm.get_pdos('plt', atom['orbitals'], readpdos=False, spin=False)
+            atom['pdos'] = atm.pdos
+        self.enary = self.atomlist[0]['pdos']['enary']
 
-    def plotldos(self, ax, orbital, geo='', ls='-', lw=1., ):
+    def plotpdos(self, ax, orbital, geo='', ls='-', lw=1., ):
         '''
         orbital = 's' / 'p' / 'd'
         geo = 'description of system structure geometry'
@@ -48,5 +48,5 @@ class LDOS:
         for atom in self.atomlist:
             i+=1
             color = colorlist[i%len(colorlist)]
-            self.ax.plot(self.enary - self.fermi, atom['ldos'][orbital], color = color, label=geo+atom['elem']+' '+str(atom['atomid']), linestyle=ls, linewidth=lw )
+            self.ax.plot(self.enary - self.fermi, atom['pdos'][orbital], color = color, label=geo+atom['elem']+' '+str(atom['atomid']), linestyle=ls, linewidth=lw )
 

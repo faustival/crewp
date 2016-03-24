@@ -13,7 +13,7 @@ class Atom:
         self.atomid = atomid
         self.elem = elem
 
-    def get_ldos(self, oupfpre, orbitals, readpdos=True, spin=True):
+    def get_pdos(self, oupfpre, orbitals, readpdos=True, spin=True):
         '''
         Read the pdos files of the atom.
 
@@ -38,14 +38,14 @@ class Atom:
 
         NEW Attributes:
         ===============
-        self.ldos = { 'enary': np.array[energy array], 
+        self.pdos = { 'enary': np.array[energy array], 
                       's': np.array[s array], 
                       'p': np.array[p array],
                       ... }
         '''
         # dictionary building correspondence of orbital ID
         orbital_dict = { 's':'1', 'p':'2', 'd':'3', 'f':'4' }
-        self.ldos = {}
+        self.pdos = {}
         for orbital in orbitals:
             pdosfname = oupfpre + \
                         '.pdos_atm#' + str(self.atomid) + \
@@ -53,12 +53,12 @@ class Atom:
                         orbital_dict[orbital] + '(' + orbital + ')'
             print('Reading', pdosfname, '...')
             cols = np.loadtxt(pdosfname, unpack=True)
-            if 'enary' not in self.ldos:
-                self.ldos['enary'] = cols[0]
+            if 'enary' not in self.pdos:
+                self.pdos['enary'] = cols[0]
             if not spin:
-                self.ldos[orbital] = cols[1]
+                self.pdos[orbital] = cols[1]
             elif spin:
-                self.ldos[orbital] = cols[1:3]
+                self.pdos[orbital] = cols[1:3]
             if readpdos:
                 print('PDOS reading not implemented yet!')
                 sys.exit()
