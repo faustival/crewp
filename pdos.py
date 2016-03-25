@@ -63,12 +63,22 @@ class PDOS:
                  }
         '''
         enary = self.enary
-        sumpdos = np.zeros((enary.shape[0]))
+        pdos_sum = np.zeros((enary.shape[0]))
         for atomid, orbitaldict in aodict.items():
             for orbital, angularlist in orbitaldict.items():
                 for angular in angularlist:
-                    sumpdos += self.atomdict[atomid]['pdos'][orbital][angular]
-        return enary, sumpdos
+                    pdos_sum += self.atomdict[atomid]['pdos'][orbital][angular]
+        return enary, pdos_sum
+    
+    def sumpdos_all(self):
+        '''
+        sum all pdos contribution from ``self.atomdict``
+        Be careful if [orbital]['tot'] is included
+        '''
+        aolist = [ i for i in self.atomdict.keys() ]
+        aodict = self.get_sum_aodict(aolist)
+        enary, pdos_sum = self.sumpdos(aodict)
+        return enary, pdos_sum
 
     def plotpdos(self, ax, orbital, angular, geo='', ls='-', lw=1., ):
         '''
