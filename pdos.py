@@ -10,30 +10,52 @@ class PDOS:
     * energy array
 
     Two functions:
-    * load all PDOS in atomlist, and updated as self.atomlist[i]['pdos']
+    * load all PDOS in atomdict, and updated as self.atomdict[i]['pdos']
     * plot pdos
     '''
 
-    def __init__(self, atomlist, fermi):
+    def __init__(self, atomdict, fermi):
         '''
-        atomlist = [
-           {'atomid':13, 'elem':'Pd', 'orbitals':{'d':['tot','x2-y2'],},
-           {'atomid':14, 'elem':'Pd', 'orbitals':{'d':['tot','zx'],},},
-                   ]
+        atomdict = {
+                    '13':{ 'elem':'Pd', 'orbitals':{'d':['tot','x2-y2'],},
+                    '14':{ 'elem':'Pd', 'orbitals':{'d':['tot','zx'],},},
+                   {
         '''
-        self.atomlist = atomlist
+        self.atomdict = atomdict
         self.fermi = fermi
         self.getpdos()
 
     def getpdos(self):
         '''
-        self.atomlist['pdos'] was updated.
+        self.atomdict['id']['pdos'] was updated.
         '''
-        for atom in self.atomlist:
-            atm = Atom(atom['atomid'],atom['elem'])
-            atm.get_pdos('plt', atom['orbitals'], spin=False)
-            atom['pdos'] = atm.pdos
-        self.enary = self.atomlist[0]['pdos']['enary']
+        for atomid, atom in self.atomdict.items():
+            atomobj = Atom(atomid, atom['elem'])
+            atomobj.get_pdos('plt', atom['orbitals'], spin=False)
+            atom['pdos'] = atomobj.pdos
+        self.enary = list(self.atomdict.values())[0]['pdos']['enary']
+
+    def sumpdos(self, aodict):
+        '''
+        Sum PDOS with a dictionary definition.
+        Useful when testing MO assignment from atomic orbital combinations.
+        aodict = { 
+                  '13' : { 
+                           's' : ['tot'],
+                         },
+                  '14' : { 
+                           'p' : ['z'],
+                           'd' : ['z2', 'xy'],
+                         },
+                 }
+        '''
+        enary = self.enary
+        sumpdos = np.zeros((enary.shape[0]))
+        for atomid, orbitaldict in aodict.items():
+            for orbital, angularlist in orbitaldict.items():
+                for angular in angularlist:
+                    sumpdos += self.atomdict[atomid]['pdos'][orbital][angular]
+        return enary, sumpdos
 
     def plotpdos(self, ax, orbital, angular, geo='', ls='-', lw=1., ):
         '''
@@ -45,8 +67,8 @@ class PDOS:
         self.ax = ax
         colorlist = ('b', 'r', 'g', 'c', 'm', 'y')
         i = -1
-        for atom in self.atomlist:
+        for atomid, atom in self.atomdict.items():
             i+=1
             color = colorlist[i%len(colorlist)]
-            self.ax.plot(self.enary - self.fermi, atom['pdos'][orbital][angular], color = color, label=geo+atom['elem']+' '+str(atom['atomid']), linestyle=ls, linewidth=lw )
+            self.ax.plot(self.enary - self.fermi, atom['pdos'][orbital][angular], color = color, label=geo+atom['elem']+' '+atomid, linestyle=ls, linewidth=lw )
 

@@ -7,7 +7,7 @@ class Atom:
 
     def __init__(self, atomid, elem):
         '''
-        self.atomid : atom ID in output, integer
+        self.atomid : atom ID in output, string
         self.elem : element of atom, string
         '''
         self.atomid = atomid
@@ -66,7 +66,7 @@ class Atom:
                       'xy':   6,
                     }
         self.pdos = {}
-        for orbital in orbitals:
+        for orbital, angularlist in orbitals.items():
             pdosfname = oupfpre + \
                         '.pdos_atm#' + str(self.atomid) + \
                         '(' + self.elem + ')_wfc#' + \
@@ -76,7 +76,7 @@ class Atom:
             cols = np.loadtxt(pdosfname, unpack=True)
             if 'enary' not in self.pdos:
                 self.pdos['enary'] = cols[0]
-            for angular in orbitals[orbital]:
+            for angular in angularlist:
                 self.pdos[orbital] = {}
                 self.pdos[orbital][angular] = cols[anglr_col[angular]]
 
