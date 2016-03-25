@@ -35,6 +35,19 @@ class PDOS:
             atom['pdos'] = atomobj.pdos
         self.enary = list(self.atomdict.values())[0]['pdos']['enary']
 
+    def get_sum_aodict(self, aolist):
+        '''
+        Build atomic orbital dictionary, prepare for sumpdos method,
+        from atom ID list as integer
+        aolist = [13, 14]
+        useful when summation of PDOS orbital-angular dictionary is the same as reading
+        '''
+        aodict = {}
+        for i in aolist:
+            atomid = str(i)
+            aodict[atomid] = self.atomdict[atomid]['orbitals']
+        return aodict
+
     def sumpdos(self, aodict):
         '''
         Sum PDOS with a dictionary definition.
