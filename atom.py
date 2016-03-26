@@ -78,7 +78,7 @@ class Atom:
             cols = np.loadtxt(pdosfname, unpack=True)
             if not hasattr(self, 'pdos_enary'):
                 self.pdos_enary = cols[0]
+            self.pdos[orbital] = {}
             for angular in angularlist:
-                self.pdos[orbital] = {}
                 self.pdos[orbital][angular] = cols[anglr_col[angular]]
 

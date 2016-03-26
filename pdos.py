@@ -28,7 +28,6 @@ class PDOS:
             cols = np.loadtxt('plt.pdos_tot', unpack=True)
             self.totread = cols[2]
 
-
     def getpdos(self):
         '''
         self.atomdict['id']['pdos'] was updated.
@@ -69,8 +68,6 @@ class PDOS:
         '''
         enary = self.enary
         pdos_sum = np.zeros((enary.shape[0]))
-        print('AO_dict :', aodict)
-        print('PDOS_dict: ', self.atomdict)
         for atomid, orbitaldict in aodict.items():
             for orbital, angularlist in orbitaldict.items():
                 for angular in angularlist:
