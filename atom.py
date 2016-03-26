@@ -44,7 +44,9 @@ class Atom:
 
         NEW Attributes:
         ===============
-        self.pdos = { 'enary': np.array[energy array], 
+
+        self.pdos_enary =  np.array[energy array]
+        self.pdos = { 
                       's': { 'tot': np.array[tot array], }
                       'p': { 'tot': np.array[tot array],
                              'z': np.array[z array],
@@ -74,8 +76,8 @@ class Atom:
             if poupfname:
                 print('Reading', pdosfname, '...')
             cols = np.loadtxt(pdosfname, unpack=True)
-            if 'enary' not in self.pdos:
-                self.pdos['enary'] = cols[0]
+            if not hasattr(self, 'pdos_enary'):
+                self.pdos_enary = cols[0]
             for angular in angularlist:
                 self.pdos[orbital] = {}
                 self.pdos[orbital][angular] = cols[anglr_col[angular]]

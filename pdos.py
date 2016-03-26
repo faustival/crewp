@@ -14,7 +14,7 @@ class PDOS:
     * plot pdos
     '''
 
-    def __init__(self, atomdict, fermi):
+    def __init__(self, atomdict, fermi, readtot=False):
         '''
         atomdict = {
                     '13':{ 'elem':'Pd', 'orbitals':{'d':['tot','x2-y2'],},
@@ -24,6 +24,10 @@ class PDOS:
         self.atomdict = atomdict
         self.fermi = fermi
         self.getpdos()
+        if readtot:
+            cols = np.loadtxt('plt.pdos_tot', unpack=True)
+            self.totread = cols[2]
+
 
     def getpdos(self):
         '''
@@ -33,7 +37,8 @@ class PDOS:
             atomobj = Atom(atomid, atom['elem'])
             atomobj.get_pdos('plt', atom['orbitals'], spin=False)
             atom['pdos'] = atomobj.pdos
-        self.enary = list(self.atomdict.values())[0]['pdos']['enary']
+            if not hasattr(self, 'enary'):
+                self.enary = atomobj.pdos_enary
 
     def get_sum_aodict(self, aolist):
         '''
@@ -64,6 +69,8 @@ class PDOS:
         '''
         enary = self.enary
         pdos_sum = np.zeros((enary.shape[0]))
+        print('AO_dict :', aodict)
+        print('PDOS_dict: ', self.atomdict)
         for atomid, orbitaldict in aodict.items():
             for orbital, angularlist in orbitaldict.items():
                 for angular in angularlist:
