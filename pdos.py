@@ -20,6 +20,8 @@ class PDOS:
                     '13':{ 'elem':'Pd', 'orbitals':{'d':['tot','x2-y2'],},
                     '14':{ 'elem':'Pd', 'orbitals':{'d':['tot','zx'],},},
                    {
+        preserve for ``atomdict`` after pdos reading, 
+        to keep a sequencial record of angular-orbitals
         '''
         self.atomdict = atomdict
         self.fermi = fermi
@@ -97,5 +99,9 @@ class PDOS:
         for atomid, atom in self.atomdict.items():
             i+=1
             color = colorlist[i%len(colorlist)]
-            self.ax.plot(self.enary - self.fermi, atom['pdos'][orbital][angular], color = color, label=geo+atom['elem']+' '+atomid, linestyle=ls, linewidth=lw )
+            line, = self.ax.plot(self.enary - self.fermi, atom['pdos'][orbital][angular], color = color, label=geo+atom['elem']+' '+atomid, linestyle=ls, linewidth=lw )
+            if ls=='--':
+                line.set_dashes([5,2.5])
+
+
 

@@ -1,5 +1,6 @@
 #! /usr/bin/python3
 
+import os
 import numpy as np
 import sys
 
@@ -73,6 +74,10 @@ class Atom:
                         '.pdos_atm#' + str(self.atomid) + \
                         '(' + self.elem + ')_wfc#' + \
                         orbital_dict[orbital] + '(' + orbital + ')'
+            if not os.path.isfile(pdosfname):
+                #print('PDOS file', pdosfname, ', does not exist!')
+                sys.exit('PDOS file: ' + pdosfname + '\n' \
+                          + 'in '  + os.getcwd() + ', does not exist!')
             if poupfname:
                 print('Reading', pdosfname, '...')
             cols = np.loadtxt(pdosfname, unpack=True)
