@@ -86,7 +86,7 @@ class PDOS:
         enary, pdos_sum = self.sumpdos(aodict)
         return enary, pdos_sum
 
-    def plotpdos(self, ax, orbital, angular, geo='', ls='-', lw=1., ):
+    def plotpdos(self, ax, orbital, angular, plot_pref='', ls='-', lw=1., ):
         '''
         orbital = 's' / 'p' / 'd'
         geo = 'description of system structure geometry'
@@ -96,10 +96,12 @@ class PDOS:
         self.ax = ax
         colorlist = ('b', 'r', 'g', 'c', 'm', 'y')
         i = -1
-        for atomid, atom in self.atomdict.items():
+        for atomid in sorted(list(self.atomdict.keys())):
+        #for atomid, atom in self.atomdict.items():
+            atom = self.atomdict[atomid]
             i+=1
             color = colorlist[i%len(colorlist)]
-            line, = self.ax.plot(self.enary - self.fermi, atom['pdos'][orbital][angular], color = color, label=geo+atom['elem']+' '+atomid, linestyle=ls, linewidth=lw )
+            line, = self.ax.plot(self.enary - self.fermi, atom['pdos'][orbital][angular], color = color, label=plot_pref+atom['elem']+' '+atomid, linestyle=ls, linewidth=lw )
             if ls=='--':
                 line.set_dashes([5,2.5])
 
