@@ -1,7 +1,7 @@
 #! /usr/bin/python3
 
 import numpy as np
-from qescripts.atom import Atom
+from .qe.atom import Atom
 
 class PDOS:
     '''

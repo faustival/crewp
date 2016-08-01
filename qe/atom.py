@@ -62,11 +62,11 @@ class Atom:
                       'z':2,
                       'x':3,
                       'y':4,
-                      'z2':   2,
-                      'zx':   3,
-                      'zy':   4,
-                      'x2-y2':5,
-                      'xy':   6,
+                      'z2':    2,
+                      'zx':    3,
+                      'zy':    4,
+                      'x2-y2': 5,
+                      'xy':    6,
                     }
         self.pdos = {}
         for orbital, angularlist in orbitals.items():
