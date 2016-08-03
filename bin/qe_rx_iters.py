@@ -7,8 +7,8 @@ from matplotlib import rc
 import matplotlib.pyplot as plt
 from qescripts.qe.rxiters import rxIters
 
-plt.rc('text', usetex=True)
-globfontsize = 26
+#plt.rc('text', usetex=True)
+globfontsize = 20
 mpl.rcParams.update({'font.size': globfontsize,
                      'font.family': "serif",
                      #'font.serif': [],                   
