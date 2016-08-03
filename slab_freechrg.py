@@ -1,9 +1,8 @@
-#! /usr/bin/python3
 
 import numpy as np
 from scipy.integrate import simps
 from .qe.plotio_read import PlotIORead
-from chrg_avgz import ChrgAvgZ
+from .chrg_avgz import ChrgAvgZ
 
 
 class SlabFreeChrg:
