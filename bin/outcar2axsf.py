@@ -11,4 +11,7 @@ else:
 print('Reading VASP OUTCAR filetype, ', inpfname)
 
 outcar_obj = Outcar(inpfname)
-outcar_obj.get_basics()
+print('Elements: ', outcar_obj.elements)
+print('N_ions of each element: ', outcar_obj.n_ions)
+
+
