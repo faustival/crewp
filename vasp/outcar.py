@@ -53,6 +53,22 @@ class Outcar:
             atomlist += [element]*self.n_ionlist[i]
         self.atomlist = atomlist
 
+    def get_latvecs(self):
+        '''
+        Lattice vectors
+        '''
+        outcarf = open(self.fname, 'r')
+        while True:
+            line = outcarf.readline()
+            if 'direct lattice vectors' in line:
+                latvecs = []
+                for i in range(3):
+                    line = outcarf.readline()
+                    latvecs.append( [ float(entry) for entry in line.split()[:3] ] )
+                break
+        outcarf.close()
+        self.latvecs = latvecs
+
     def get_rlx_traj(self):
         '''
         Read position-vector natom*(3+3) dimensional tuple,
@@ -70,9 +86,7 @@ class Outcar:
                 outcarf.readline()
                 i_rlx += 1
                 pos_forc = []
-                i_atom = 0
-                while i_atom < self.n_atoms:
-                    i_atom += 1
+                for i_atom in range(self.n_atoms):
                     line = outcarf.readline()
                     pos_forc.append( [ float(entry) for entry in line.split() ] )
                 rlx_pos_forc.append( pos_forc )
