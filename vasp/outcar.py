@@ -1,15 +1,6 @@
 
 import re
 
-def read_pos_vec():
-    '''
-    Read position-vector natom*(3+3) dimensional tuple,
-    used in:
-    * ionic relaxation: position(3) - force(3)  
-    * frequency: position(3) - eigenvector of dynamical matrix(3)
-    '''
-    pass
-
 class Outcar:
     '''
     To keep the information self-consistent, 
@@ -31,6 +22,7 @@ class Outcar:
                 n_ionlist = [ int(i) for i in tmp_str.split() ]
                 break
         outcarf.close()
+        self.n_atoms = sum(n_ionlist)
         self.n_iontype = len(n_ionlist)
         self.n_ionlist = n_ionlist
 
@@ -53,6 +45,45 @@ class Outcar:
                 elements.append(m.group())
         outcarf.close()
         self.elements = elements
+
+    def get_rlx_traj(self):
+        '''
+        Read position-vector natom*(3+3) dimensional tuple,
+        in ionic relaxation.
+        position(3) -- force(3)  
+        stored as:
+        self.rlx_pos_forc[[[]]] (n_iter*n_atoms*6)
+        '''
+        outcarf = open(self.fname, 'r')
+        rlx_pos_forc = []
+        i_rlx = 0
+        while True:
+            line = outcarf.readline()
+            if 'POSITION   ' in line:
+                outcarf.readline()
+                i_rlx += 1
+                pos_forc = []
+                i_atom = 0
+                while i_atom < self.n_atoms:
+                    i_atom += 1
+                    line = outcarf.readline()
+                    pos_forc.append( [ float(entry) for entry in line.split() ] )
+                rlx_pos_forc.append( pos_forc )
+            if not line: break
+        outcarf.close()
+        self.rlx_pos_forc = rlx_pos_forc
+
+    def get_vib(self):
+        '''
+        Read position-vector natom*(3+3) dimensional tuple,
+        in vibrational frequency calculation.
+        position(3) - eigenvector of dynamical matrix(3)
+        '''
+        outcarf = open(self.fname, 'r')
+        while True:
+            line = outcarf.readline()
+            if not line: break
+        outcarf.close()
 
     def get_template(self):
         '''
