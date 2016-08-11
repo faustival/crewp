@@ -1,4 +1,5 @@
 
+import sys
 import re
 
 class Outcar:
@@ -133,6 +134,8 @@ class Outcar:
             self.get_rlx_traj()
         elif 5 <= ibrion <= 8:
             self.get_vib()
+        else:
+            sys.exit('No IBRION match, auto_creep stop running.')
         self.ibrion = ibrion
 
     def get_template(self):
