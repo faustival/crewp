@@ -12,6 +12,7 @@ class Outcar:
         self.fname = fname
         self.get_nions()
         self.get_elements()
+        self.get_atomlist()
 
     def get_nions(self):
         outcarf = open(self.fname, 'r')
@@ -45,6 +46,12 @@ class Outcar:
                 elements.append(m.group())
         outcarf.close()
         self.elements = elements
+
+    def get_atomlist(self):
+        atomlist = []
+        for i, element in enumerate(self.elements):
+            atomlist += [element]*self.n_ionlist[i]
+        self.atomlist = atomlist
 
     def get_rlx_traj(self):
         '''
