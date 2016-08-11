@@ -5,5 +5,5 @@
 *.dat
 *.swp
 vasp/OUTCAR*
-vasp/vasp.py
-vasp/outcar2axsf.py
+*outcar2axsf.py
+xcrysf.py

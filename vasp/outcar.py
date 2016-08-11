@@ -22,6 +22,7 @@ class Outcar:
                 tmp_str = line.split('=')[1]
                 n_ionlist = [ int(i) for i in tmp_str.split() ]
                 break
+            elif not line: break
         outcarf.close()
         self.n_atoms = sum(n_ionlist)
         self.n_iontype = len(n_ionlist)
@@ -44,6 +45,8 @@ class Outcar:
                 pseudo_type = line.split()[2]
                 m = re.match('[A-Z][a-z]?', pseudo_type)
                 elements.append(m.group())
+
+            elif not line: break
         outcarf.close()
         self.elements = elements
 
@@ -52,6 +55,10 @@ class Outcar:
         for i, element in enumerate(self.elements):
             atomlist += [element]*self.n_ionlist[i]
         self.atomlist = atomlist
+
+    '''
+    The following methods was not initiated in __init__(self)
+    '''
 
     def get_latvecs(self):
         '''
@@ -66,6 +73,7 @@ class Outcar:
                     line = outcarf.readline()
                     latvecs.append( [ float(entry) for entry in line.split()[:3] ] )
                 break
+            elif not line: break
         outcarf.close()
         self.latvecs = latvecs
 
@@ -90,7 +98,7 @@ class Outcar:
                     line = outcarf.readline()
                     pos_forc.append( [ float(entry) for entry in line.split() ] )
                 rlx_pos_forc.append( pos_forc )
-            if not line: break
+            elif not line: break
         outcarf.close()
         self.rlx_pos_forc = rlx_pos_forc
 
@@ -105,6 +113,27 @@ class Outcar:
             line = outcarf.readline()
             if not line: break
         outcarf.close()
+
+    def auto_creep(self):
+        '''
+        Determine type of ionic update by reading ``IBRION``.
+        And creep for corresponding components.
+        * IBRION in range [1, 3]: call self.get_rlx_traj()
+        * IBRION in range [5, 8]: call self.get_vib()
+        '''
+        outcarf = open(self.fname, 'r')
+        while True:
+            line = outcarf.readline()
+            if 'IBRION' in line and '=' in line:
+                ibrion = int(line.split('=')[-1].split()[0])
+                break
+            elif not line: break
+        outcarf.close()
+        if 1 <= ibrion <= 3:
+            self.get_rlx_traj()
+        elif 5 <= ibrion <= 8:
+            self.get_vib()
+        self.ibrion = ibrion
 
     def get_template(self):
         '''

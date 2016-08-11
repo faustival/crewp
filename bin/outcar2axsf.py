@@ -12,7 +12,7 @@ print('Reading VASP OUTCAR filetype, ', inpfname)
 
 outcar_obj = Outcar(inpfname)
 outcar_obj.get_latvecs()
-outcar_obj.get_rlx_traj()
+outcar_obj.auto_creep()
 
 
 
