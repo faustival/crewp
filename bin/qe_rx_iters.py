@@ -5,7 +5,7 @@ import re
 import matplotlib as mpl
 from matplotlib import rc
 import matplotlib.pyplot as plt
-from qescripts.qe.rxiters import rxIters
+from crewp.qe.rxiters import rxIters
 
 #plt.rc('text', usetex=True)
 globfontsize = 20
