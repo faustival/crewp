@@ -5,6 +5,6 @@
 *.dat
 *.swp
 
+*.axsf
 *OUTCAR*
 outcar2axsf.py
-anim_fixcell.axsf

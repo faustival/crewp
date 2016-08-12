@@ -82,7 +82,7 @@ class Outcar:
         '''
         Read position-vector natom*(3+3) dimensional tuple,
         in ionic relaxation.
-        position(3) -- force(3)  
+        position(3) -- force(3) (Angstrom -- eV/Angstrom)
         stored as:
         self.rlx_pos_forc[[[]]] (n_iter*n_atoms*6)
         '''
