@@ -4,6 +4,7 @@
 *.log
 *.dat
 *.swp
-vasp/OUTCAR*
-*outcar2axsf.py
-xcrysf.py
+
+*OUTCAR*
+outcar2axsf.py
+anim_fixcell.axsf

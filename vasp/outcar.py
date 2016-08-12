@@ -132,6 +132,7 @@ class Outcar:
         outcarf.close()
         if 1 <= ibrion <= 3:
             self.get_rlx_traj()
+            self.anim_vec6d = self.rlx_pos_forc 
         elif 5 <= ibrion <= 8:
             self.get_vib()
         else:
