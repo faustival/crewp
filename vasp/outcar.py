@@ -84,10 +84,10 @@ class Outcar:
         in ionic relaxation.
         position(3) -- force(3) (Angstrom -- eV/Angstrom)
         stored as:
-        self.rlx_pos_forc[[[]]] (n_iter*n_atoms*6)
+        self.rlx_pos3_forc3[[[]]] (n_iter*n_atoms*6)
         '''
         outcarf = open(self.fname, 'r')
-        rlx_pos_forc = []
+        rlx_pos3_forc3 = []
         i_rlx = 0
         while True:
             line = outcarf.readline()
@@ -98,10 +98,10 @@ class Outcar:
                 for i_atom in range(self.n_atoms):
                     line = outcarf.readline()
                     pos_forc.append( [ float(entry) for entry in line.split() ] )
-                rlx_pos_forc.append( pos_forc )
+                rlx_pos3_forc3.append( pos_forc )
             elif not line: break
         outcarf.close()
-        self.rlx_pos_forc = rlx_pos_forc
+        self.rlx_pos3_forc3 = rlx_pos3_forc3
 
     def get_vib(self):
         '''
@@ -110,10 +110,34 @@ class Outcar:
         position(3) - eigenvector of dynamical matrix(3)
         '''
         outcarf = open(self.fname, 'r')
+        # Find number of modes
         while True:
             line = outcarf.readline()
-            if not line: break
-        outcarf.close()
+            if 'Degrees of freedom DOF' in line:
+                n_modes = int(line.split('=')[-1].split()[0])
+                # Find beginning of dynamical matrix
+                while True:
+                    line = outcarf.readline()
+                    if 'Eigenvectors and eigenvalues of the dynamical matrix' in line:
+                        for passline in range(3):
+                            outcarf.readline() # 3 dummy lines
+                        # Get all vibrational info
+                        vib_pos3_eigvec3 = []
+                        for i_mode in range(n_modes):
+                            vib_header = outcarf.readline()
+                            print(vib_header)
+                            outcarf.readline() # a dummy line
+                            # Get eigenvector within single mode
+                            pos_eigvec = []
+                            for i_atom in range(self.n_atoms):
+                                line = outcarf.readline()
+                                pos_eigvec.append( [ float(entry) for entry in line.split() ] )
+                            outcarf.readline() # a dummy line
+                            vib_pos3_eigvec3.append(pos_eigvec)
+                        break
+            if not line: break # always put this before close file
+        outcarf.close() # always put this on bottom of readline loop
+        self.vib_pos3_eigvec3 = vib_pos3_eigvec3
 
     def auto_creep(self):
         '''
@@ -132,9 +156,10 @@ class Outcar:
         outcarf.close()
         if 1 <= ibrion <= 3:
             self.get_rlx_traj()
-            self.anim_vec6d = self.rlx_pos_forc 
+            self.anim_vec6d = self.rlx_pos3_forc3 
         elif 5 <= ibrion <= 8:
             self.get_vib()
+            self.anim_vec6d = self.vib_pos3_eigvec3
         else:
             sys.exit('No IBRION match, auto_creep stop running.')
         self.ibrion = ibrion

@@ -26,6 +26,7 @@ if 1 <= outcar_obj.ibrion <= 3:
     outcar_obj.anim_vec6d = scale_anim_force(outcar_obj.anim_vec6d, 1./27.2)
     axsfname = 'anim_rlx.axsf'
 elif 5 <= outcar_obj.ibrion <= 8:
+    outcar_obj.anim_vec6d = scale_anim_force(outcar_obj.anim_vec6d, 1./50.)
     axsfname = 'anim_vib.axsf'
 
 wrt_anim_fixcell( axsfname = axsfname,
