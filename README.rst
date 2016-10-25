@@ -1,10 +1,10 @@
 
 
 ******************************
-CreWP: Creeping with Particles
+CrewP: Creeping with Particles
 ******************************
 
-CreWP is creeping with IO of computational electronic structure packages.
+CrewP is creeping with IO of computational electronic structure packages.
 
 The scripts is accumulating with author's adapting to new packages and functions.
 
