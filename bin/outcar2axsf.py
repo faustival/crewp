@@ -2,7 +2,7 @@
 
 import sys
 from crewp.vasp.outcar import Outcar
-from crewp.xcrysf import wrt_anim_fixcell
+from crewp.xcrysden.xcrysf import wrt_anim_fixcell
 
 def scale_anim_force(anim_coords, scale=1./27.2):
     for atomvecs in anim_coords:
