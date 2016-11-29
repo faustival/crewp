@@ -35,7 +35,7 @@ class Oupf:
         '''
         self.link_line_no = [] # line NO.s of 'Entering Link 1'
         self.route_line_no = [] # line NO.s of route section
-        self.route_line = [] # Strings of route section
+        self.route_lines = [] # Strings of route section
         oupf = open(self.fname, 'r')
         for i, line in enumerate(oupf, 1): 
             '''
@@ -45,9 +45,9 @@ class Oupf:
             if 'Entering Link 1' in line:
                 self.link_line_no.append(i)
             if read_route and re.match('^\s*#', line):
-                if ( len(self.route_line) == len(self.link_line_no) - 1 ):
+                if ( len(self.route_lines) == len(self.link_line_no) - 1 ):
                     self.route_line_no.append(i)
-                    self.route_line.append(line)
+                    self.route_lines.append(line)
         oupf.close()
 
     def get_vib(self, ilink=0):
@@ -59,9 +59,43 @@ class Oupf:
         # Jump to the route line of i-th 'Entering Link 1'.
         for i in range(self.route_line_no[ilink]):
             oupf.readline()
-        # Find degree of freedom
-        degline = get_line(oupf, 'search', 'Deg. of freedom')
-        print(degline)
+        # Find NO. of atoms.
+        natomline = get_line(oupf, 'match', '^\s*NAtoms')
+        natom = int(natomline.split()[1])
+        # Find the 1st appearance of 'Harmonic frequencies (cm**-1)'
+        tmpline = get_line(oupf, 'search', 'Harmonic frequencies \(cm\*\*-1\)')
+        '''
+        Start reading spectrum section.
+        STRONGLY suggest move to 'Harmonic frequencies' tag in file.
+        '''
+        modes_no = []
+        frequencies = []
+        ir_intens = []
+        raman_activ = []
+        while True:
+            line = oupf.readline() # expected to be mode NO. sequences
+            print(line)
+            try: 
+                modes = [ int(n) for n in line.split() ]
+                if modes: # not blank line
+                    # Begin filling data.
+                    modes_no += modes 
+                    while True:
+                        line = oupf.readline()
+                        if re.match('^\s*Frequencies', line):
+                            print(line)
+                        if re.match('^\s*Coord', line):
+                            for i in range(3*natom):
+                                line = oupf.readline()
+                            break
+                        if re.match('^\s*Atom ', line):
+                            for i in range(natom):
+                                line = oupf.readline()
+                            break
+                    print(modes)
+            except ValueError: # not all words are numbers
+                if modes_no: break
+        print('Modes: ', modes_no)
         oupf.close()
 
     def get_vib_auto(self):
@@ -73,8 +107,8 @@ class Oupf:
         '''
         freq_routes = []
         # check all route section to find if the ONLY 'freq' job
-        for i, line in enumerate(self.route_line):
-            if re.search('freq', line, re.IGNORECASE):
+        for i, route_line in enumerate(self.route_lines):
+            if re.search('freq', route_line, re.IGNORECASE):
                 freq_routes.append(i)
                 if len(freq_routes) > 1: # Case: not ONLY 1 'freq' job.
                     sys.exit("At least 2 'freq' job in output:", self.fname)
@@ -82,7 +116,7 @@ class Oupf:
         if not freq_routes: # Case: NO 'freq' job found.
             sys.exit("'freq' job NOT found in output:", self.fname)
         freq_route_no, = freq_routes # Case: found the only 1 'freq' job.
-        print("The only 'freq' job:", freq_route_no)
+        print("  The only 'freq' job in ", freq_route_no, "-th 'Entering Link 1'.")
         # Call method to read vibrational info.
         self.get_vib(freq_route_no)
 
