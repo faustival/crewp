@@ -24,8 +24,6 @@ class Oupf:
         self.fname = fname
         # Read over once and find all links and route section.
         self.get_link_route()
-        # Delete all below after test:
-        self.get_vib_auto()
 
     def get_link_route(self, read_route=True):
         '''
@@ -63,7 +61,7 @@ class Oupf:
         natomline = get_line(oupf, 'match', '^\s*NAtoms')
         natom = int(natomline.split()[1])
         # Find the 1st appearance of 'Harmonic frequencies (cm**-1)'
-        tmpline = get_line(oupf, 'search', 'Harmonic frequencies \(cm\*\*-1\)')
+        tmpline = get_line(oupf, 'match', '^\s*Harmonic frequencies \(cm\*\*-1\)')
         '''
         Start reading spectrum section.
         STRONGLY suggest move to 'Harmonic frequencies' tag in file.
@@ -74,29 +72,42 @@ class Oupf:
         raman_activ = []
         while True:
             line = oupf.readline() # expected to be mode NO. sequences
-            print(line)
             try: 
                 modes = [ int(n) for n in line.split() ]
                 if modes: # not blank line
                     # Begin filling data.
                     modes_no += modes 
-                    while True:
+                    while True: # here keywords should be scanned in correct order, or some rows missed.
                         line = oupf.readline()
                         if re.match('^\s*Frequencies', line):
-                            print(line)
+                            frequencies += [ float(a) for a in line.split()[2:] ]
+                        if re.match('^\s*IR Inten', line):
+                            ir_intens += [ float(a) for a in line.split()[3:] ]
+                        if re.match('^\s*Raman Activ', line):
+                            raman_activ += [ float(a) for a in line.split()[3:] ]
                         if re.match('^\s*Coord', line):
                             for i in range(3*natom):
                                 line = oupf.readline()
+                                '''
+                                This should be the 'hpmodes' type
+                                Read eigenvector of dynamical matrix here.
+                                '''
                             break
                         if re.match('^\s*Atom ', line):
                             for i in range(natom):
                                 line = oupf.readline()
+                                '''
+                                Only 2 digits. Skip here.
+                                '''
                             break
-                    print(modes)
             except ValueError: # not all words are numbers
-                if modes_no: break
-        print('Modes: ', modes_no)
+                if modes_no: break # Data already filled.
+                # else: all lists empty, still in the title mess.
         oupf.close()
+        self.vib_modeseq = modes_no
+        self.vib_freq = frequencies
+        self.ir_intens = ir_intens
+        self.raman_activ = raman_activ
 
     def get_vib_auto(self):
         '''
