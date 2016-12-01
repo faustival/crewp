@@ -1,6 +1,6 @@
 
 import numpy as np
-from raman import cross_section
+from crewp.spectra.raman import cross_section
 
 class Spectra:
 
