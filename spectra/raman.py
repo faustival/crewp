@@ -1,7 +1,7 @@
 
 import numpy as np
 from crewp.cuconv.constants import epsilon0,planck,boltzmann,clight
-from crewp.cuconv.uconv import ang2meter
+from crewp.cuconv.uconv import ang2meter,amu2kg
 
 def cross_section(vibfreq, activity, freq_inc=632.8, temp=298.0,):
     '''
@@ -24,7 +24,7 @@ def cross_section(vibfreq, activity, freq_inc=632.8, temp=298.0,):
     # Unit conversion to SI
     '''
     # Raman activity, S
-    s = activity*(ang2meter**4)*(4*np.pi*epsilon0)**2 
+    s = activity*(ang2meter**4)*(4*np.pi*epsilon0)**2/(amu2kg**2)
     # Vibrational frequency, wavenumber, \nu cm-1 to m-1
     wvn = 100.*vibfreq
     laser = 1/freq_inc*1.e9
