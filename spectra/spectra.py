@@ -1,4 +1,5 @@
 
+import itertools as it
 import numpy as np
 from crewp.spectra.raman import cross_section
 
@@ -31,3 +32,9 @@ class Spectra:
             intens_ary += intens_list[i]*(gamma/np.pi)/( (freq_ary-freq0)**2 + gamma**2 )
         self.freq_ary = freq_ary
         self.intens_ary = intens_ary
+
+    def wrt_csv(self, xunit='(cm-1)', yunit='(a.u.)', datfname='spectra.dat'):
+        headtag = 'Frequencies ' + xunit + ',' + 'Intensity ' + yunit
+        data_cols = tuple( [self.freq_ary, self.intens_ary] )
+        np.savetxt(datfname, np.column_stack(data_cols), delimiter=',', header=headtag)
+
