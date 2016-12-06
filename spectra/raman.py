@@ -27,13 +27,14 @@ def cross_section(vibfreq, activity, freq_inc=632.8, temp=298.0,):
     s = activity*(ang2meter**4)*(4*np.pi*epsilon0)**2/(amu2kg**2)
     # Vibrational frequency, wavenumber, \nu cm-1 to m-1
     wvn = 100.*vibfreq
-    laser = 1/freq_inc*1.e9
+    laser = 1./freq_inc*1.e9
     '''
     # Calculate in parts
     '''
     boltzcorr = 1./( 1. - np.exp( -planck*clight*wvn/(boltzmann*temp) ) )
-    prefactor = ( (laser-wvn)**4/wvn )*planck/(45.*8.*clight*epsilon0**2)
-    crsection = prefactor*boltzcorr*s
+    lasercorr = (laser-wvn)**4/wvn
+    prefactor = planck/(45.*8.*clight*epsilon0**2)
+    crsection = prefactor*lasercorr*boltzcorr*s
     return crsection
 
 
