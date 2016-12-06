@@ -33,7 +33,7 @@ def cross_section(vibfreq, activity, freq_inc=632.8, temp=298.0,):
     '''
     boltzcorr = 1./( 1. - np.exp( -planck*clight*wvn/(boltzmann*temp) ) )
     prefactor = ( (laser-wvn)**4/wvn )*planck/(45.*8.*clight*epsilon0**2)
-    crsection = prefactor*boltzmann*s
+    crsection = prefactor*boltzcorr*s
     return crsection
 
 
