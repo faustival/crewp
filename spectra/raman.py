@@ -1,7 +1,7 @@
 
 import numpy as np
-from crewp.cuconv.constants import epsilon0,planck,boltzmann,clight
-from crewp.cuconv.uconv import ang2meter,amu2kg
+from crewp.cuconv.constants_gaussian import planck,boltzmann,clight
+from crewp.cuconv.uconv import ang2cm,amu2g
 
 def cross_section(vibfreq, activity, freq_inc=632.8, temp=298.0,):
     '''
@@ -18,22 +18,17 @@ def cross_section(vibfreq, activity, freq_inc=632.8, temp=298.0,):
     ======
     OUTPUT
     ======
-    crsection: Raman differential scattering cross section, m^2/sr
+    crsection: Raman differential scattering cross section, cm^2/sr
     '''
-    '''
-    # Unit conversion to SI
-    '''
-    # Raman activity, S
-    s = activity*(ang2meter**4)*(4*np.pi*epsilon0)**2/(amu2kg**2)
-    # Vibrational frequency, wavenumber, \nu cm-1 to m-1
-    wvn = 100.*vibfreq
-    laser = 1./freq_inc*1.e9
+    # Raman activity, S, Unit conversion to CGS-Gaussian 
+    s = activity*(ang2cm**4/amu2g)**2
+    laserfreq = 1./freq_inc*1.e7
     '''
     # Calculate in parts
     '''
-    boltzcorr = 1./( 1. - np.exp( -planck*clight*wvn/(boltzmann*temp) ) )
-    lasercorr = (laser-wvn)**4/wvn
-    prefactor = planck/(45.*8.*clight*epsilon0**2)
+    boltzcorr = 1./( 1. - np.exp( -planck*clight*vibfreq/(boltzmann*temp) ) )
+    lasercorr = (laserfreq-vibfreq)**4/vibfreq
+    prefactor = 2*(np.pi**2)*planck/(45.*clight)
     crsection = prefactor*lasercorr*boltzcorr*s
     return crsection
 
