@@ -1,6 +1,7 @@
 
 import sys
 import re
+import numpy as np
 
 class Outcar:
     '''
@@ -101,7 +102,7 @@ class Outcar:
                 rlx_pos3_forc3.append( pos_forc )
             elif not line: break
         outcarf.close()
-        self.rlx_pos3_forc3 = rlx_pos3_forc3
+        self.rlx_pos3_forc3 = np.array(rlx_pos3_forc3)
 
     def get_vib(self):
         '''
@@ -137,7 +138,7 @@ class Outcar:
                         break
             if not line: break # always put this before close file
         outcarf.close() # always put this on bottom of readline loop
-        self.vib_pos3_eigvec3 = vib_pos3_eigvec3
+        self.vib_pos3_eigvec3 = np.array(vib_pos3_eigvec3)
 
     def auto_creep(self):
         '''
