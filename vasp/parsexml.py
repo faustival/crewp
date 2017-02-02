@@ -2,31 +2,48 @@
 
 import lxml.etree as etr
 import numpy as np
+from crewp.lattice.coordtrans import frac2cart
+
+'''
+# delete this checking function 
+'''
+def type_step_arrays(routename, ary3):
+    print("ROUTINE", routename, )
+    for i, coordstep in enumerate(ary3):
+        print("STEP ", i)
+        for coord in coordstep:
+            print( '   '+' '.join( '{:13.8f}'.format(entry) for entry in coord ) )
+        print('\n')
 
 def get_latvecs(fname='vasprun.xml'):
     pass
 
 def get_rlx_traj_pos(fname='vasprun.xml'):
+    '''
+    pos3: atomic positions in fractional crystal coordinate, shape( nsteps, natoms, 3)
+    '''
     xmltree = etr.parse(fname)
     elem_position_list = xmltree.xpath('//calculation/structure/varray[@name="positions"]')
-    rlx_pos3 = [] # len = number of steps
+    pos3 = [] # len = number of steps
     for elem_position in elem_position_list:
-        rlx_pos3_step = [] # len = number of atoms
+        pos3_step = [] # len = number of atoms
         for elem in elem_position:
-            rlx_pos3_step.append( [ float(a) for a in elem.text.split() ] )
-        rlx_pos3.append(rlx_pos3_step)
-    return rlx_pos3
+            pos3_step.append( [ float(a) for a in elem.text.split() ] )
+        pos3.append(pos3_step)
+    pos3 = np.array(pos3)
+    return pos3
 
 def get_rlx_traj_latvec(fname='vasprun.xml'):
     xmltree = etr.parse(fname)
     elem_latvec_list = xmltree.xpath('//calculation/structure/crystal/varray[@name="basis"]')
-    rlx_latvec = [] # len = number of steps
+    latvec = [] # len = number of steps
     for elem_latvec in elem_latvec_list :
-        rlx_latvec_step = [] # len = 3        
+        latvec_step = [] # len = 3        
         for elem in elem_latvec:
-            rlx_latvec_step.append( [ float(a) for a in elem.text.split() ] )
-        rlx_latvec.append(rlx_latvec_step)
-    return rlx_latvec
+            latvec_step.append( [ float(a) for a in elem.text.split() ] )
+        latvec.append(latvec_step)
+    latvec = np.array(latvec)
+    return latvec
 
 def get_rlx_traj_forc(fname='vasprun.xml'):
     pass
@@ -46,9 +63,14 @@ def auto_creep(fname='vasprun.xml'):
     isif = int(elem_isif.text)
     if 1 <= ibrion <= 3:
         if 0 <= isif <= 2 : # fixed cell
-            pass
+            pos3 = get_rlx_traj_pos(fname)
         elif 3 <= isif <= 7 : # variable cell
-            anim_vec6d = get_rlx_traj(fname)
+            pos3 = get_rlx_traj_pos(fname)
+            latvec = get_rlx_traj_latvec(fname)
+            pos3_cart = []
+            for i in range(len(pos3)):
+                pos3_cart.append( frac2cart( pos3[i], latvec[i] ) )
+            type_step_arrays('pos3_cart', pos3_cart) # print to check arrays
     elif 5 <= ibrion <= 8:
         anim_vec6d = get_vib(fname)
     else:
