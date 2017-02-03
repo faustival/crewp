@@ -79,7 +79,7 @@ class Outcar:
         outcarf.close()
         self.latvecs = latvecs
 
-    def get_rlx_traj(self):
+    def get_rlx_steps(self):
         '''
         Read position-vector natom*(3+3) dimensional tuple,
         in ionic relaxation.
@@ -144,7 +144,7 @@ class Outcar:
         '''
         Determine type of ionic update by reading ``IBRION``.
         And creep for corresponding components.
-        * IBRION in range [1, 3]: call self.get_rlx_traj()
+        * IBRION in range [1, 3]: call self.get_rlx_steps()
         * IBRION in range [5, 8]: call self.get_vib()
         '''
         outcarf = open(self.fname, 'r')
@@ -156,7 +156,7 @@ class Outcar:
             elif not line: break
         outcarf.close()
         if 1 <= ibrion <= 3:
-            self.get_rlx_traj()
+            self.get_rlx_steps()
             self.anim_vec6d = self.rlx_pos3_forc3 
         elif 5 <= ibrion <= 8:
             self.get_vib()

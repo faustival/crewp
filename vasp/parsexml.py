@@ -4,48 +4,51 @@ import lxml.etree as etr
 import numpy as np
 from crewp.lattice.coordtrans import frac2cart
 
-'''
-# delete this checking function 
-'''
-def type_step_arrays(routename, ary3):
-    print("ROUTINE", routename, )
+def type_step_arrays(arrayname, ary3):
+    '''
+    # delete this checking function after test 
+    '''
+    print("Printing array: ", arrayname, )
     for i, coordstep in enumerate(ary3):
         print("STEP ", i)
         for coord in coordstep:
             print( '   '+' '.join( '{:13.8f}'.format(entry) for entry in coord ) )
         print('\n')
 
-def get_latvecs(fname='vasprun.xml'):
+def get_latvec(fname='vasprun.xml'):
     pass
 
-def get_rlx_traj_pos(fname='vasprun.xml'):
+def get_rlx_steps_latvec(fname='vasprun.xml'):
     '''
-    pos3: atomic positions in fractional crystal coordinate, shape( nsteps, natoms, 3)
+    latvec_steps: lattice cell vectors in each SCF step, 
+    shape( nsteps, 3, 3)
+    '''
+    xmltree = etr.parse(fname)
+    elem_latvec_list = xmltree.xpath('//calculation/structure/crystal/varray[@name="basis"]')
+    latvec_steps = [] # len = number of steps
+    for elem_latvec in elem_latvec_list :
+        latvec = [] # len = 3        
+        for elem in elem_latvec:
+            latvec.append( [ float(a) for a in elem.text.split() ] )
+        latvec_steps.append(latvec)
+    return np.array(latvec_steps)
+
+def get_rlx_steps_pos(fname='vasprun.xml'):
+    '''
+    pos_steps: atomic positions of each SCF step in fractional crystal coordinate, 
+    shape( nsteps, natoms, 3)
     '''
     xmltree = etr.parse(fname)
     elem_position_list = xmltree.xpath('//calculation/structure/varray[@name="positions"]')
-    pos3 = [] # len = number of steps
+    pos_steps = [] # len = number of steps
     for elem_position in elem_position_list:
-        pos3_step = [] # len = number of atoms
+        pos = [] # len = number of atoms
         for elem in elem_position:
-            pos3_step.append( [ float(a) for a in elem.text.split() ] )
-        pos3.append(pos3_step)
-    pos3 = np.array(pos3)
-    return pos3
+            pos.append( [ float(a) for a in elem.text.split() ] )
+        pos_steps.append(pos)
+    return np.array(pos_steps)
 
-def get_rlx_traj_latvec(fname='vasprun.xml'):
-    xmltree = etr.parse(fname)
-    elem_latvec_list = xmltree.xpath('//calculation/structure/crystal/varray[@name="basis"]')
-    latvec = [] # len = number of steps
-    for elem_latvec in elem_latvec_list :
-        latvec_step = [] # len = 3        
-        for elem in elem_latvec:
-            latvec_step.append( [ float(a) for a in elem.text.split() ] )
-        latvec.append(latvec_step)
-    latvec = np.array(latvec)
-    return latvec
-
-def get_rlx_traj_forc(fname='vasprun.xml'):
+def get_rlx_steps_forc(fname='vasprun.xml'):
     pass
 
 def get_vib(fname='vasprun.xml'):
@@ -61,17 +64,17 @@ def auto_creep(fname='vasprun.xml'):
     elem_isif, = xmltree.xpath('//parameters/separator[@name="ionic"]/i[@name="ISIF"]') # don't parse <incar> tag
     ibrion = int(elem_ibrion.text)
     isif = int(elem_isif.text)
-    if 1 <= ibrion <= 3:
+    if 1 <= ibrion <= 3: # ionic relax
         if 0 <= isif <= 2 : # fixed cell
-            pos3 = get_rlx_traj_pos(fname)
+            pos3 = get_rlx_steps_pos(fname)
         elif 3 <= isif <= 7 : # variable cell
-            pos3 = get_rlx_traj_pos(fname)
-            latvec = get_rlx_traj_latvec(fname)
-            pos3_cart = []
-            for i in range(len(pos3)):
-                pos3_cart.append( frac2cart( pos3[i], latvec[i] ) )
-            type_step_arrays('pos3_cart', pos3_cart) # print to check arrays
-    elif 5 <= ibrion <= 8:
+            pos_steps = get_rlx_steps_pos(fname)
+            latvec_steps = get_rlx_steps_latvec(fname)
+            pos_steps_cart = []
+            for i in range(len(pos_steps)):
+                pos_steps_cart.append( frac2cart( pos_steps[i], latvec_steps[i] ) )
+            type_step_arrays('pos_steps_cart', pos_steps_cart) # print to check arrays
+    elif 5 <= ibrion <= 8: # vibrational frequencies
         anim_vec6d = get_vib(fname)
     else:
         sys.exit('No IBRION match, auto_creep stop running.')

@@ -6,5 +6,5 @@
 *.swp
 
 *.axsf
-*OUTCAR*
 *.xml
+*OUTCAR*
