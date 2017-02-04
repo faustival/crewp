@@ -15,44 +15,32 @@ def type_step_arrays(arrayname, ary3):
             print( '   '+' '.join( '{:13.8f}'.format(entry) for entry in coord ) )
         print('\n')
 
-def get_latvec(fname='vasprun.xml'):
-    pass
+        '''
+        pos_steps: atomic positions of each SCF step in fractional crystal coordinate, 
+                   shape( nsteps, natoms, 3)
+        latvec_steps: lattice cell vectors in each SCF step, 
+                   shape( nsteps, 3, 3)
+        '''
+xpath_dict = { 
+        'pos_steps' : '//calculation/structure/varray[@name="positions"]' ,  
+        'latvec_steps' : '//calculation/structure/crystal/varray[@name="basis"]' ,
+        }
 
-def get_rlx_steps_latvec(fname='vasprun.xml'):
+def get_varray_steps(xpathcode, fname='vasprun.xml', ):
     '''
-    latvec_steps: lattice cell vectors in each SCF step, 
-    shape( nsteps, 3, 3)
-    '''
-    xmltree = etr.parse(fname)
-    elem_latvec_list = xmltree.xpath('//calculation/structure/crystal/varray[@name="basis"]')
-    latvec_steps = [] # len = number of steps
-    for elem_latvec in elem_latvec_list :
-        latvec = [] # len = 3        
-        for elem in elem_latvec:
-            latvec.append( [ float(a) for a in elem.text.split() ] )
-        latvec_steps.append(latvec)
-    return np.array(latvec_steps)
-
-def get_rlx_steps_pos(fname='vasprun.xml'):
-    '''
-    pos_steps: atomic positions of each SCF step in fractional crystal coordinate, 
-    shape( nsteps, natoms, 3)
+    parsing 2D-arrays in <varray> tag, 
+    arrays in each SCF step is stacked
+    varray_steps: shape( nsteps, nvectors, vector_dim)
     '''
     xmltree = etr.parse(fname)
-    elem_position_list = xmltree.xpath('//calculation/structure/varray[@name="positions"]')
-    pos_steps = [] # len = number of steps
-    for elem_position in elem_position_list:
-        pos = [] # len = number of atoms
-        for elem in elem_position:
-            pos.append( [ float(a) for a in elem.text.split() ] )
-        pos_steps.append(pos)
-    return np.array(pos_steps)
-
-def get_rlx_steps_forc(fname='vasprun.xml'):
-    pass
-
-def get_vib(fname='vasprun.xml'):
-    pass
+    elem_list = xmltree.xpath(xpathcode)
+    varray_steps = [] # len = number of steps
+    for elem_varray in elem_list :
+        varray = [] # len = nvectors
+        for elem in elem_varray:
+            varray.append( [ float(a) for a in elem.text.split() ] )
+        varray_steps.append(varray)
+    return np.array(varray_steps)
 
 def auto_creep(fname='vasprun.xml'):
     xmltree = etr.parse(fname)
@@ -66,16 +54,16 @@ def auto_creep(fname='vasprun.xml'):
     isif = int(elem_isif.text)
     if 1 <= ibrion <= 3: # ionic relax
         if 0 <= isif <= 2 : # fixed cell
-            pos3 = get_rlx_steps_pos(fname)
+            pos_steps = get_varray_steps(xpath_dict['pos_steps'], fname)
         elif 3 <= isif <= 7 : # variable cell
-            pos_steps = get_rlx_steps_pos(fname)
-            latvec_steps = get_rlx_steps_latvec(fname)
+            pos_steps = get_varray_steps(xpath_dict['pos_steps'], fname)
+            latvec_steps = get_varray_steps(xpath_dict['latvec_steps'], fname)
             pos_steps_cart = []
             for i in range(len(pos_steps)):
                 pos_steps_cart.append( frac2cart( pos_steps[i], latvec_steps[i] ) )
             type_step_arrays('pos_steps_cart', pos_steps_cart) # print to check arrays
     elif 5 <= ibrion <= 8: # vibrational frequencies
-        anim_vec6d = get_vib(fname)
+        pass
     else:
         sys.exit('No IBRION match, auto_creep stop running.')
 
