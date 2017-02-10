@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import sys
-from crewp.vasp.parsexml import get_bornchg, auto_creep
+from crewp.vasp.parsexml import ParseXML
 
 if len(sys.argv) < 2:
     xmlfname = 'vasprun.xml'
@@ -10,8 +10,8 @@ else:
 
 print('Parsing file: ', xmlfname)
 
-#get_bornchg(xmlfname)
-auto_creep(xmlfname)
+xmlf = ParseXML(xmlfname)
+xmlf.auto_creep()
 
 
 
