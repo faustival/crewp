@@ -20,12 +20,14 @@ def type_varray(arrayname, ary2):
 def type_step_varrays(arrayname, ary3):
     print("Printing arrays: ", arrayname, )
     for i, ary2 in enumerate(ary3):
-        ary2dname = 'STEP: '+'{:d}'.format(i)
+        ary2dname = 'STEP: '+'{:d}'.format(i+1)
         type_varray(ary2dname, ary2)
 
 '''
 latvec_init: initial lattice cell vectors, 
             shape( 3, 3)
+selectdyn_init: boolean array of initial selective dynamics 
+            shape( natoms, 3)
 vib_eigvec: vibrational eigenvectors of Hessian
             shape( nDOF, nDOF), DOF: Degree of freedom
             for systems with frozen coordinates, (nDOF != 3*natoms)
@@ -39,6 +41,7 @@ force_steps: forces of each SCF step,
 '''
 xpath_dict = { 
         'latvec_init' : '//structure[@name="initialpos"]/crystal/varray[@name="basis"]' , # expected single
+        'selectdyn_init' : '//structure[@name="initialpos"]/varray[@name="selective"]' , # expected single
         'vib_eigvec' : '//calculation/dynmat/varray[@name="eigenvectors"]' , # expected single
         'position_steps' : '//calculation/structure/varray[@name="positions"]' , # expected steps 
         'latvec_steps' : '//calculation/structure/crystal/varray[@name="basis"]' , # expected steps
@@ -50,14 +53,18 @@ class ParseXML:
     def __init__(self, fname='vasprun.xml', ):
         self.xmltree = etr.parse(fname)
 
-    def varray2darry(self, elem_varray):
+    def varray2darry(self, elem_varray, vtype='float',):
         '''
         Arrange data in ``elem_varray`` element (e.g., <varray>)
         into numpy 2d-array.
         '''
         varray = [] # len = nvectors
-        for elem_vec in elem_varray:
-            varray.append( [ float(a) for a in elem_vec.text.split() ] )
+        if vtype=='float':
+            for elem_vec in elem_varray:
+                varray.append( [ float(a) for a in elem_vec.text.split() ] )
+        elif vtype=='boolean':
+            for elem_vec in elem_varray:
+                varray.append( [ a=='T' for a in elem_vec.text.split() ] )
         return np.array(varray)
 
     def get_varray(self, xpathcode, ):
@@ -68,7 +75,10 @@ class ParseXML:
         if len(elem_varray) != 1:
             sys.exit('From get_varray, xpathcode returns not ONLY ONE match!')
         elem_varray, = elem_varray
-        varray = self.varray2darry(elem_varray)
+        if ('type' in elem_varray.attrib) and (elem_varray.attrib['type']=="logical"): # boolean array
+            varray = self.varray2darry(elem_varray, 'boolean')
+        else: # float array
+            varray = self.varray2darry(elem_varray)
         return varray
 
     def get_varray_steps(self, xpathcode, ):
@@ -84,6 +94,24 @@ class ParseXML:
             varray = self.varray2darry(elem_varray)
             varray_steps.append(varray)
         return np.array(varray_steps)
+
+    def get_vibeig_coord(self, ):
+        '''
+        Fill the full eigenvector of vibrational dynamical matrix 
+            (DOF frozen was filled zero), and reshape as 3Darray
+            to adapt natom*3 coordinate-type arrays.
+        vibeig_coord: shape( ndof, natoms, 3 )
+        '''
+        eigarry = self.get_varray(xpath_dict['vib_eigvec'],)
+        selectdynarry = self.get_varray(xpath_dict['selectdyn_init'],)
+        natoms = selectdynarry.shape[0] # number of atoms
+        ndof = eigarry.shape[0] # number of degree of freedoms
+        selectdynarry1d = np.reshape(selectdynarry, (3*natoms), )
+        eigaugarry = np.zeros((3*natoms, ndof))
+        eigaugarry[ selectdynarry1d ] = np.transpose(eigarry, ) # fill by boolean  
+        eigaugarry = np.transpose(eigaugarry, )
+        vibeig_coord = np.reshape(eigaugarry, (ndof, natoms, 3), )
+        return vibeig_coord 
 
     def auto_creep(self, ):
         '''
@@ -109,7 +137,8 @@ class ParseXML:
                     position_steps_cart.append( frac2cart( position_steps[i], latvec_steps[i] ) )
             type_step_varrays('position_steps_cart', position_steps_cart) # print to check arrays
         elif 5 <= ibrion <= 8: # vibrational frequencies
-            pass
+            vibeig_coord = self.get_vibeig_coord()
+            type_step_varrays('vibeig_coord', vibeig_coord, )
         else:
             sys.exit('No IBRION match, auto_creep stop running.')
 
