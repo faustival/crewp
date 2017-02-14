@@ -3,25 +3,9 @@
 import lxml.etree as etr
 import numpy as np
 from crewp.lattice.coordtrans import frac2cart
+from crewp.io.array import wrt_2darry, wrt_3darry
 import sys
-
-'''
-# delete these typing function after test 
-'''
-def type_varray(arrayname, ary2):
-    '''
-    Printing 2-index array, i.e., matrix
-    '''
-    print("  Printing 2d-array: ", arrayname, )
-    for vec in ary2:
-        print( '   '+' '.join( '{:13.8f}'.format(entry) for entry in vec ) )
-    print('\n')
-
-def type_step_varrays(arrayname, ary3):
-    print("Printing arrays: ", arrayname, )
-    for i, ary2 in enumerate(ary3):
-        ary2dname = 'STEP: '+'{:d}'.format(i+1)
-        type_varray(ary2dname, ary2)
+import os
 
 '''
 latvec_init: initial lattice cell vectors, 
@@ -51,6 +35,9 @@ xpath_dict = {
 class ParseXML:
 
     def __init__(self, fname='vasprun.xml', ):
+        if not os.path.isfile(fname):
+            sys.exit('From crewp.vasp.parsexml.ParseXML, ' \
+                      +'file does not exist: '+fname)
         self.xmltree = etr.parse(fname)
 
     def varray2darry(self, elem_varray, vtype='float',):
@@ -135,10 +122,10 @@ class ParseXML:
                 position_steps_cart = []
                 for i in range(len(position_steps)):
                     position_steps_cart.append( frac2cart( position_steps[i], latvec_steps[i] ) )
-            type_step_varrays('position_steps_cart', position_steps_cart) # print to check arrays
+            wrt_3darry(position_steps_cart, 'position_steps_cart', ) # print to check arrays
         elif 5 <= ibrion <= 8: # vibrational frequencies
             vibeig_coord = self.get_vibeig_coord()
-            type_step_varrays('vibeig_coord', vibeig_coord, )
+            wrt_3darry(vibeig_coord, 'vibeig_coord', )
         else:
             sys.exit('No IBRION match, auto_creep stop running.')
 

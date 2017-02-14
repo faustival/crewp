@@ -1,26 +1,32 @@
 
+import numpy as np
+from crewp.io.array import wrt_2darry
+
 '''
 Detailed description of (A)XSF file, see official manual:
 http://www.xcrysden.org/doc/XSF.html
 '''
 
-def wrt_anim_fixcell(primvec, atomlist, anim_coords, axsfname='anim_fixcell.axsf', ):
+def wrt_anim(primvec, anim_coords, atomlist, axsfname='anim_xcrys.axsf', ):
+    '''
+    Write as fix cell if primvec is input as 2d-array,
+        else iterate 1st index of primvec (3d-array) to variable cell.
+    '''
+    fixcell = ( len( np.shape(primvec) ) == 2 ) # if primvec input as 2d-array
+    natoms = anim_coords.shape[1] # number of atoms
     axsf = open(axsfname, 'w')
     # write the header
     axsf.write( '{:s} {:d}'.format('ANIMSTEPS ', len(anim_coords))+'\n' )
     axsf.write( 'CRYSTAL\n' )
-    # write primitive cell vectors
-    axsf.write( 'PRIMVEC\n' )
-    for i in range(3):
-        axsf.write( '   '+' '.join( '{:13.8f}'.format(entry) for entry in primvec[i] )+'\n' )
-    # write animation
-    for i_step, atomvecs in enumerate(anim_coords, 1):
-        axsf.write( '{:s} {:d}'.format('PRIMCOORD', i_step)+'\n' )
-        axsf.write( '   {:d}    {:d}'.format(len(atomvecs), 1)+'\n' )
-        for i_atom, vec in enumerate(atomvecs):
-            axsf.write( '   {:2s} '.format(atomlist[i_atom]) + \
-                        ' '.join( '{:13.8f}'.format(entry) for entry in vec ) + \
-                        '\n' )
+    if fixcell: # write fix lattice cell 
+        wrt_2darry(primvec, 'PRIMVEC', f=axsf)
+    for i_step, anim_step in enumerate(anim_coords, 1): # write animation
+        if not fixcell:
+            title_latvec = '{:s} {:d}'.format('PRIMVEC', i_step)
+            wrt_2darry(primvec[i_step], title_latvec , f=axsf)
+        title_coord = '{:s} {:d}'.format('PRIMCOORD', i_step)+'\n' \
+                      + '   {:d}    {:d}'.format(natoms, 1)
+        wrt_2darry(anim_step, title_coord, rowtags=atomlist, f=axsf)
     axsf.close()
 
 

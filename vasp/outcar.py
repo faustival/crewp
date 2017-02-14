@@ -102,7 +102,7 @@ class Outcar:
                 rlx_pos3_forc3.append( pos_forc )
             elif not line: break
         outcarf.close()
-        self.rlx_pos3_forc3 = np.array(rlx_pos3_forc3)
+        return np.array(rlx_pos3_forc3)
 
     def get_vib(self):
         '''
@@ -138,7 +138,7 @@ class Outcar:
                         break
             if not line: break # always put this before close file
         outcarf.close() # always put this on bottom of readline loop
-        self.vib_pos3_eigvec3 = np.array(vib_pos3_eigvec3)
+        return np.array(vib_pos3_eigvec3)
 
     def auto_creep(self):
         '''
@@ -156,11 +156,9 @@ class Outcar:
             elif not line: break
         outcarf.close()
         if 1 <= ibrion <= 3:
-            self.get_rlx_steps()
-            self.anim_vec6d = self.rlx_pos3_forc3 
+            self.anim_vec6d = self.get_rlx_steps() 
         elif 5 <= ibrion <= 8:
-            self.get_vib()
-            self.anim_vec6d = self.vib_pos3_eigvec3
+            self.anim_vec6d = self.get_vib()
         else:
             sys.exit('No IBRION match, auto_creep stop running.')
         self.ibrion = ibrion
