@@ -20,11 +20,11 @@ def wrt_anim(primvec, anim_coords, atomlist, axsfname='anim_xcrys.axsf', ):
     axsf.write( 'CRYSTAL\n' )
     if fixcell: # write fix lattice cell 
         wrt_2darry(primvec, 'PRIMVEC', f=axsf)
-    for i_step, anim_step in enumerate(anim_coords, 1): # write animation
+    for i_step, anim_step in enumerate(anim_coords ): # write animation
         if not fixcell:
-            title_latvec = '{:s} {:d}'.format('PRIMVEC', i_step)
+            title_latvec = '{:s} {:d}'.format('PRIMVEC', i_step+1)
             wrt_2darry(primvec[i_step], title_latvec , f=axsf)
-        title_coord = '{:s} {:d}'.format('PRIMCOORD', i_step)+'\n' \
+        title_coord = '{:s} {:d}'.format('PRIMCOORD', i_step+1)+'\n' \
                       + '   {:d}    {:d}'.format(natoms, 1)
         wrt_2darry(anim_step, title_coord, rowtags=atomlist, f=axsf)
     axsf.close()

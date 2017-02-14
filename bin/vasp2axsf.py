@@ -1,6 +1,8 @@
 #! /usr/bin/python3
 
 import sys
+import numpy as np
+from crewp.io.array import wrt_3darry, wrt_2darry
 from crewp.vasp.parsexml import ParseXML
 from crewp.xcrysden.xcrysf import wrt_anim
 
@@ -11,20 +13,23 @@ else:
 
 print('Reading VASP XML output, ', xmlfname)
 xmlf = ParseXML(xmlfname)
-xmlf.auto_creep()
+atomlist = xmlf.get_atomlist()
+latvec, position, anim_vecs = xmlf.auto_creep()
 
-'''
-# scale force vector if need
-if 1 <= outcar_obj.ibrion <= 3:
-    outcar_obj.anim_vec6d[:,:,3:] *= 1./27.2 
+if -1 <= xmlf.ibrion <= 3:
+    anim_vec6 = np.concatenate( (position, anim_vecs), axis=2 )
+    anim_vec6[:,:,3:] *= 1./27.2 # scale force
     axsfname = 'anim_rlx.axsf'
-elif 5 <= outcar_obj.ibrion <= 8:
-    outcar_obj.anim_vec6d[:,:,3:] *= 1./50. 
+elif 5 <= xmlf.ibrion <= 8:
+    nsteps = anim_vecs.shape[0]
+    position = np.array([position]*nsteps) # repeat 2d-array of initial position
+    anim_vec6 = np.concatenate( (position, anim_vecs), axis=2 )
+    anim_vec6[:,:,3:] *= 1./50. # scale displacement
     axsfname = 'anim_vib.axsf'
 
-wrt_anim_fixcell( axsfname = axsfname,
-                  primvec = outcar_obj.latvecs,
-                  atomlist = outcar_obj.atomlist,
-                  anim_coords = outcar_obj.anim_vec6d,
-                )
-'''
+wrt_anim( 
+          primvec = latvec,
+          anim_coords = anim_vec6,
+          atomlist = atomlist,
+          axsfname = axsfname,
+        )  

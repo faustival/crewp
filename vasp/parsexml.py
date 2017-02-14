@@ -1,11 +1,10 @@
 #! /usr/bin/python3
 
-import lxml.etree as etr
-import numpy as np
-from crewp.lattice.coordtrans import frac2cart
-from crewp.io.array import wrt_2darry, wrt_3darry
 import sys
 import os
+import numpy as np
+import lxml.etree as etr
+from crewp.lattice.coordtrans import frac2cart
 
 '''
 latvec_init: initial lattice cell vectors, 
@@ -25,6 +24,7 @@ force_steps: forces of each SCF step,
 '''
 xpath_dict = { 
         'latvec_init' : '//structure[@name="initialpos"]/crystal/varray[@name="basis"]' , # expected single
+        'position_init' : '//structure[@name="initialpos"]/varray[@name="positions"]' , # expected single
         'selectdyn_init' : '//structure[@name="initialpos"]/varray[@name="selective"]' , # expected single
         'vib_eigvec' : '//calculation/dynmat/varray[@name="eigenvectors"]' , # expected single
         'position_steps' : '//calculation/structure/varray[@name="positions"]' , # expected steps 
@@ -82,6 +82,11 @@ class ParseXML:
             varray_steps.append(varray)
         return np.array(varray_steps)
 
+    def get_atomlist(self, ):
+        elem_atomlist = self.xmltree.xpath('//atominfo/array[@name="atoms"]/set/rc/c[1]')
+        atomlist = [ elem.text for elem in elem_atomlist]
+        return atomlist
+
     def get_vibeig_coord(self, ):
         '''
         Fill the full eigenvector of vibrational dynamical matrix 
@@ -90,7 +95,7 @@ class ParseXML:
         vibeig_coord: shape( ndof, natoms, 3 )
         '''
         eigarry = self.get_varray(xpath_dict['vib_eigvec'],)
-        selectdynarry = self.get_varray(xpath_dict['selectdyn_init'],)
+        selectdynarry = self.get_varray(xpath_dict['selectdyn_init'],) # boolean
         natoms = selectdynarry.shape[0] # number of atoms
         ndof = eigarry.shape[0] # number of degree of freedoms
         selectdynarry1d = np.reshape(selectdynarry, (3*natoms), )
@@ -103,35 +108,45 @@ class ParseXML:
     def auto_creep(self, ):
         '''
         # Get required parameters for auto creep:
-        #   IBRION, ISIF
+        #   IBRION, ISIF attached to self
         '''
         elem_ibrion, = self.xmltree.xpath('//parameters/separator[@name="ionic"]/i[@name="IBRION"]') # don't parse <incar> tag
         elem_isif, = self.xmltree.xpath('//parameters/separator[@name="ionic"]/i[@name="ISIF"]') # don't parse <incar> tag
         ibrion = int(elem_ibrion.text)
         isif = int(elem_isif.text)
+        self.ibrion = ibrion
+        self.isif = isif
         if -1 <= ibrion <= 3: # ionic steps
-            position_steps = self.get_varray_steps(xpath_dict['position_steps'],) # fractional coordinate
+            position_steps_frac = self.get_varray_steps(xpath_dict['position_steps'],) # fractional coordinate
             force_steps = self.get_varray_steps(xpath_dict['force_steps'],)
             if 0 <= isif <= 2 : # fixed cell
-                latvec_init = self.get_varray(xpath_dict['latvec_init'],)
-                position_steps_cart = []
-                for i in range(len(position_steps)):
-                    position_steps_cart.append( frac2cart( position_steps[i], latvec_init ) )
+                latvec = self.get_varray(xpath_dict['latvec_init'],) # 2d-array
+                position_steps = []
+                for i in range(len(position_steps_frac)):
+                    position_steps.append( frac2cart( position_steps_frac[i], latvec ) )
             elif 3 <= isif <= 7 : # variable cell
-                latvec_steps = self.get_varray_steps(xpath_dict['latvec_steps'],)
-                position_steps_cart = []
-                for i in range(len(position_steps)):
-                    position_steps_cart.append( frac2cart( position_steps[i], latvec_steps[i] ) )
-            wrt_3darry(position_steps_cart, 'position_steps_cart', ) # print to check arrays
+                latvec = self.get_varray_steps(xpath_dict['latvec_steps'],) # steps as 3d-array
+                position_steps = []
+                for i in range(len(position_steps_frac)):
+                    position_steps.append( frac2cart( position_steps_frac[i], latvec[i] ) )
+            '''
+            pass return values
+            '''
+            latvec = latvec
+            position = position_steps
+            anim_vecs = force_steps
         elif 5 <= ibrion <= 8: # vibrational frequencies
+            latvec = self.get_varray(xpath_dict['latvec_init'],) # 2d-array
+            position_frac = self.get_varray(xpath_dict['position_init'],) # 2d-array
+            position = frac2cart( position_frac, latvec )
             vibeig_coord = self.get_vibeig_coord()
-            wrt_3darry(vibeig_coord, 'vibeig_coord', )
+            '''
+            pass return values
+            '''
+            latvec = latvec
+            position = position
+            anim_vecs = vibeig_coord
         else:
             sys.exit('No IBRION match, auto_creep stop running.')
-
-    def get_bornchg(self, ):
-        elem_bornchg_set_list = self.xmltree.xpath('//calculation/array[@name="born_charges"]/set')
-        for vset in elem_bornchg_set_list:
-            for v in vset:
-                print(v.text)
+        return latvec, position, anim_vecs
 
