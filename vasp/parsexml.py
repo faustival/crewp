@@ -68,9 +68,9 @@ class ParseXML:
             varray = self.varray2darry(elem_varray)
         return varray
 
-    def get_varray_steps(self, xpathcode, ):
+    def get_3dvarray(self, xpathcode, ):
         '''
-        Stack 2D-arrays in each SCF step, 
+        Stack 2D-arrays in each xpathcode match into 3d-arrays, 
         from parsing 2D-arrays in <varray> tag, 
         returns :
         varray_steps: shape( nsteps, nvectors, vector_dim)
@@ -117,15 +117,15 @@ class ParseXML:
         self.ibrion = ibrion
         self.isif = isif
         if -1 <= ibrion <= 3: # ionic steps
-            position_steps_frac = self.get_varray_steps(xpath_dict['position_steps'],) # fractional coordinate
-            force_steps = self.get_varray_steps(xpath_dict['force_steps'],)
+            position_steps_frac = self.get_3dvarray(xpath_dict['position_steps'],) # fractional coordinate
+            force_steps = self.get_3dvarray(xpath_dict['force_steps'],)
             if 0 <= isif <= 2 : # fixed cell
                 latvec = self.get_varray(xpath_dict['latvec_init'],) # 2d-array
                 position_steps = []
                 for i in range(len(position_steps_frac)):
                     position_steps.append( frac2cart( position_steps_frac[i], latvec ) )
             elif 3 <= isif <= 7 : # variable cell
-                latvec = self.get_varray_steps(xpath_dict['latvec_steps'],) # steps as 3d-array
+                latvec = self.get_3dvarray(xpath_dict['latvec_steps'],) # steps as 3d-array
                 position_steps = []
                 for i in range(len(position_steps_frac)):
                     position_steps.append( frac2cart( position_steps_frac[i], latvec[i] ) )
