@@ -1,6 +1,7 @@
 
 import numpy as np
 import sys
+import builtins
 
 def wrt_2darry(arry2, title, rowtags='', f=sys.stdout):
     '''
@@ -32,3 +33,27 @@ def wrt_3darry(arry3, title, f=sys.stdout):
         arry2title = 'Inner matrix of 3D-array : '+'{:d}'.format(i+1)
         wrt_2darry(arry2, arry2title, f=f)
 
+def read_2darry( f, nrow='auto', typefunc='float', ):
+    '''
+    Call after locate to the first aligned line!
+    '''
+    arry = []
+    if nrow=='auto': # get the pattern from 1st line
+        while True:
+            words = f.readline().split()
+            if not arry: # first vector line
+                veclen = len(words)
+            elif arry: 
+                if len(words) != veclen: # break if length not match
+                    break
+            try:
+                arry.append( [ getattr(builtins, typefunc)(entry) \
+                         for entry in words ] )
+            except ValueError: # break for row pattern not match
+                break
+    else: # iterating over row number
+        for i in range(nrow):
+            words = f.readline().split()
+            arry.append( [ getattr(builtins, typefunc)(entry) \
+                     for entry in words ] )
+    return np.array(arry)

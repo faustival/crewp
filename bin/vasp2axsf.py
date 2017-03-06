@@ -6,6 +6,8 @@ from crewp.io.array import wrt_3darry, wrt_2darry
 from crewp.vasp.parsexml import ParseXML
 from crewp.xcrysden.xcrysf import wrt_anim
 
+print( sys.version )
+
 if len(sys.argv) < 2:
     xmlfname = 'vasprun.xml'
 else:
