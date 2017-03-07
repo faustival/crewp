@@ -3,7 +3,7 @@ import sys
 import os
 import numpy as np
 import lxml.etree as etr
-from crewp.lattice.coordtrans import frac2cart
+from crewp.lattice.lattice import frac2cart
 
 '''
 latvec_init: initial lattice cell vectors, 

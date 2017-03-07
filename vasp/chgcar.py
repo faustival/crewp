@@ -1,10 +1,23 @@
 
 import sys
 import numpy as np
+from crewp.lattice.lattice import cell_volume
 from crewp.io.array import read_2darry
 
 def read_chg(fname='CHGCAR'):
+    '''
+    Read charge density and reshape:
+    VASP write CHG and CHGCAR as x-contiguous
+    and row-major of numpy was forced to
+    reshape as (nz, ny, nx). 
+    That is, row(z)-major, column(x)-faster.
+    And VASP write rho*cell_volume. See:
+    https://cms.mpi.univie.ac.at/vasp/vasp/CHGCAR_file.html
+    '''
     chgf = open(fname, 'r')
+    for i in range(2): chgf.readline()
+    cell = read_2darry(chgf, )
+    cell_vol = cell_volume(cell)
     while True: 
         '''
         locating 3 integers and get shape of charge array
@@ -19,21 +32,9 @@ def read_chg(fname='CHGCAR'):
         if not line: # jump out, cannot get shape
             sys.exit('Reading VASP ', fname, ':\n' \
                     , ', cannot get shape of 3D charge array!')
-    '''
-    Read charge density and reshape
-    '''
     chrgden = np.fromfile(chgf, count=np.prod(chrg_shape), sep=' ')
-    '''
-    VASP write CHG and CHGCAR as x-contiguous
-    and row-major of numpy was forced to
-    reshape as (nz, ny, nx). 
-    That is, row(z)-major, column(x)-faster
-    '''
     chrgden = chrgden.reshape(chrg_shape[::-1])
-    return chrgden
+    chrgden /= cell_vol
+    chgf.close()
+    return chrgden, cell
 
-def read_cell(fname='CHGCAR'):
-    chgf = open(fname, 'r')
-    for i in range(2): chgf.readline()
-    cell = read_2darry(chgf, )
-    return cell
