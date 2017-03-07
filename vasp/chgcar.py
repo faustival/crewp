@@ -23,7 +23,7 @@ def read_chg(fname='CHGCAR'):
     Read charge density and reshape
     '''
     chrgden = np.fromfile(chgf, count=np.prod(chrg_shape), sep=' ')
-    chrgden = chrgden.reshape(chrg_shape)
+    chrgden = chrgden.reshape(chrg_shape[::-1])
     return chrgden
 
 def read_cell(fname='CHGCAR'):
