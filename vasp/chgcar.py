@@ -23,6 +23,12 @@ def read_chg(fname='CHGCAR'):
     Read charge density and reshape
     '''
     chrgden = np.fromfile(chgf, count=np.prod(chrg_shape), sep=' ')
+    '''
+    VASP write CHG and CHGCAR as x-contiguous
+    and row-major of numpy was forced to
+    reshape as (nz, ny, nx). 
+    That is, row(z)-major, column(x)-faster
+    '''
     chrgden = chrgden.reshape(chrg_shape[::-1])
     return chrgden
 

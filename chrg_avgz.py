@@ -8,6 +8,10 @@ class ChrgAvgZ:
     '''
 
     def __init__(self, chrg, cell):
+        '''
+        chrg should be shaped as (nz, ny, nx)
+        that is, z-major, x-contiguous
+        '''
         self.chrg = chrg
         self.cell = cell
         self.ngridz = self.chrg.shape[0]
