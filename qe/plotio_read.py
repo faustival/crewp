@@ -41,7 +41,6 @@ def plotio_read(inpfname):
         zval.append(float(words[2]))
         zval = tuple(zval)
         zvalence.append(zval)
-    print(zvalence)
     # atomic positions
     atom_coord = np.zeros((nat,3))
     for i in range(nat):

@@ -54,4 +54,3 @@ class ChrgAvgZ:
         total_valence = xyarea*simps(avgchrg, zaxis)
         return total_valence
 
-

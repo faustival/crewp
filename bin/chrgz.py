@@ -4,13 +4,11 @@ import sys
 import os
 import numpy as np
 
-from crewp.vasp.chgcar import read_chg
-from crewp.chrg_avgz import ChrgAvgZ
-from ase.calculators.vasp import VaspChargeDensity
-
 import matplotlib as mpl
 from matplotlib import rc
 import matplotlib.pyplot as plt
+
+from crewp.middleware.chrgden import get_chrg_avgz
 
 mpl.rcParams.update({'font.size': 10,
                      'font.family': "serif",
@@ -19,15 +17,9 @@ mpl.rcParams.update({'font.size': 10,
                      'mathtext.default' : 'regular',
                     })
 
-def get_chrg_avgz(fname):
-    chrgden, cell = read_chg(fname)
-    chrg_obj = ChrgAvgZ(chrgden, cell)
-    chrg_z = chrg_obj.xyavg()
-    z_ax = chrg_obj.zgrid()
-    return chrg_z, z_ax
-
 # read in CHGCAR filename series from command-line
-chrgf_list = sys.argv[1:]
+packname = sys.argv[1]
+chrgf_list = sys.argv[2:]
 
 print( sys.version )
 print( 'Readin: ', chrgf_list )
@@ -38,8 +30,9 @@ ax.set_xlabel('z (Å)')
 ax.set_ylabel(r'$\rho$')
 
 for fname in chrgf_list:
-    chrgz, z_ax = get_chrg_avgz(fname)
+    chrgz, z_ax = get_chrg_avgz(fname, packname)
     ax.plot(z_ax, chrgz, label=fname)
+    print( '    '+fname, ' done.')
 
 ax.legend(loc=2)
 plt.show()
