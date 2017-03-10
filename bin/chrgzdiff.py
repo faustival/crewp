@@ -30,7 +30,7 @@ ax.set_xlabel('z (Å)')
 ax.set_ylabel(r'$\Delta \rho$')
 
 for i, fname in enumerate(chrgf_list):
-    chrgz, z_ax = get_chrg_avgz(fname, packname)
+    chrgz, z_ax = get_chrg_avgz(fname, packname, callmethod='chrgz')
     if i==0:
         chrgz0, zaxis = chrgz, z_ax
     else:

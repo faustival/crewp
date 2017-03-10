@@ -30,7 +30,7 @@ ax.set_xlabel('z (Å)')
 ax.set_ylabel(r'$\rho$')
 
 for fname in chrgf_list:
-    chrgz, z_ax = get_chrg_avgz(fname, packname)
+    chrgz, z_ax = get_chrg_avgz(fname, packname, callmethod='chrgz')
     ax.plot(z_ax, chrgz, label=fname)
     print( '    '+fname, ' done.')
 
