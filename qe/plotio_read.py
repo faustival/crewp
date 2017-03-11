@@ -5,7 +5,7 @@ def plotio_read(inpfname):
     '''
     read the plain text file
     written by :
-    /flib/plot_io.f90 subroutine plot_io()
+    /Modules/plot_io.f90 subroutine plot_io()
 
     returns:
     ary3d:  order 3 array, axis indexed as (z, y, x),
@@ -56,9 +56,11 @@ def plotio_read(inpfname):
     atomic unit, Bohr, 3-Dim grid is set
     with Bohr unit.
     '''
+    bohr2ang = 0.529177
     alat = celldm[0]
-    cell = cell*alat
-    atom_coord = atom_coord*alat
+    cell = cell*alat*bohr2ang
+    atom_coord = atom_coord*alat*bohr2ang
+    ary3d = ary3d/bohr2ang**3
     return ary3d, cell, atom_coord
 
 class PlotIORead:
@@ -68,19 +70,19 @@ class PlotIORead:
     and related properties:
      * cell vectors
      * atomic positions
-    Default in Bohr unit.
+    Default in Å unit.
     '''
-    def __init__(self, inpfname, unit='bohr'):
+    def __init__(self, inpfname, unit='ang'):
         # save all from raw data file
         ary3d, cell, atom_coord \
         = plotio_read(inpfname)
 
         # transform to angstrom unit, if need
-        bohr2ang = 0.529177
-        if unit=='ang':
-            ary3d = ary3d/bohr2ang**3
-            cell = cell*bohr2ang
-            atom_coord = atom_coord*bohr2ang
+        if unit=='bohr':
+            bohr2ang = 0.529177
+            ary3d = ary3d*bohr2ang**3
+            cell = cell/bohr2ang
+            atom_coord = atom_coord/bohr2ang
         self.ary3d      = ary3d
         self.cell       = cell
         self.atom_coord = atom_coord 
