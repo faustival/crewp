@@ -15,10 +15,13 @@ outcar_obj.get_latvecs()
 outcar_obj.auto_creep()
 
 # scale force vector if need
-if 1 <= outcar_obj.ibrion <= 3:
+if 1 <= outcar_obj.ibrion <= 3: # relaxation
     outcar_obj.anim_vec6d[:,:,3:] *= 1./27.2 
     axsfname = 'anim_rlx.axsf'
-elif 5 <= outcar_obj.ibrion <= 8:
+elif outcar_obj.ibrion == 0: # molecular dynamics
+    outcar_obj.anim_vec6d[:,:,3:] *= 1./27.2 
+    axsfname = 'anim_md.axsf'
+elif 5 <= outcar_obj.ibrion <= 8: # vibrational frequencies
     outcar_obj.anim_vec6d[:,:,3:] *= 1./50. 
     axsfname = 'anim_vib.axsf'
 

@@ -155,7 +155,7 @@ class Outcar:
                 break
             elif not line: break
         outcarf.close()
-        if 1 <= ibrion <= 3:
+        if 0 <= ibrion <= 3:
             self.anim_vec6d = self.get_rlx_steps() 
         elif 5 <= ibrion <= 8:
             self.anim_vec6d = self.get_vib()
