@@ -16,9 +16,10 @@ Warning:
 Most concerned packages
 =======================
 
-* `Quantum ESPRESSO <http://www.quantum-espresso.org/>`_
-* `VASP <https://www.vasp.at/>`_
-* `XCrySDen <http://www.xcrysden.org/>`_
+* `Quantum ESPRESSO <http://www.quantum-espresso.org>`_
+* `VASP <https://www.vasp.at>`_
+* `XCrySDen <http://www.xcrysden.org>`_
+* `ASE <https://wiki.fysik.dtu.dk/ase/index.html>`_
 
 Epilogue
 ========
