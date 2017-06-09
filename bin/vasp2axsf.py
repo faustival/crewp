@@ -20,7 +20,7 @@ latvec, position, anim_vecs = xmlf.auto_creep()
 
 if -1 <= xmlf.ibrion <= 3:
     anim_vec6 = np.concatenate( (position, anim_vecs), axis=2 )
-    anim_vec6[:,:,3:] *= 1./27.2 # scale force
+    anim_vec6[:,:,3:] *= 1.#/27.2 # scale force
     axsfname = 'anim_rlx.axsf'
 elif 5 <= xmlf.ibrion <= 8:
     nsteps = anim_vecs.shape[0]

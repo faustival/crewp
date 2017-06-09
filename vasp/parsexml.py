@@ -118,6 +118,8 @@ class ParseXML:
         if -1 <= ibrion <= 3: # ionic steps
             position_steps_frac = self.get_3dvarray(xpath_dict['position_steps'],) # fractional coordinate
             force_steps = self.get_3dvarray(xpath_dict['force_steps'],)
+            selectdynarry = self.get_varray(xpath_dict['selectdyn_init'],) # boolean
+            force_steps[:, selectdynarry==False ] = 0. # mask constraint for forces
             if 0 <= isif <= 2 : # fixed cell
                 latvec = self.get_varray(xpath_dict['latvec_init'],) # 2d-array
                 position_steps = []
