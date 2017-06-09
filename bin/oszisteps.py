@@ -13,21 +13,24 @@ mpl.rcParams.update({'font.size': 10,
                      'mathtext.default' : 'regular',
                     })
 
+# readin OSZICARs from cli 
 if len(sys.argv) < 2:
     inpfname = 'OSZICAR'
 else:
-    inpfname = sys.argv[1]
-print('Reading VASP OSZICAR filetype, ', inpfname)
-
-en_steps = rlx_step(inpfname)
-nstep = en_steps.shape[0]
-step_seq = [i+1 for i in range(nstep)]
+    inpfname_list = sys.argv[1:]
 
 fig = plt.figure()
 ax = fig.add_subplot(1,1,1)
 ax.set_xlabel('Steps')
 ax.set_ylabel(r'E ()')
-ax.plot(step_seq, en_steps[:,1])
 
+for inpfname in inpfname_list:
+    print('Reading VASP OSZICAR filetype, ', inpfname)
+    en_steps = rlx_step(inpfname)
+    nstep = en_steps.shape[0]
+    step_seq = [i+1 for i in range(nstep)]
+    ax.plot(step_seq, en_steps[:,1], label=inpfname)
+
+ax.legend(loc=2)
 plt.show()
 
