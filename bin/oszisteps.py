@@ -22,7 +22,7 @@ else:
 fig = plt.figure()
 ax = fig.add_subplot(1,1,1)
 ax.set_xlabel('Steps')
-ax.set_ylabel(r'E ()')
+ax.set_ylabel(r'E (eV)')
 
 for inpfname in inpfname_list:
     print('Reading VASP OSZICAR filetype, ', inpfname)

@@ -2,8 +2,8 @@
 import re
 import numpy as np
 
-def rlx_step(carfname='OSZICAR'):
-    carf = open(carfname, 'r')
+def rlx_step(fname='OSZICAR'):
+    carf = open(fname, 'r')
     en_steps = []
     while True:
         line = carf.readline()
