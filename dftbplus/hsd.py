@@ -1,48 +1,95 @@
 
-def read_hsd(fname = 'dftb_in.hsd'): 
-    global curr_dict
-    hsdf = open(fname, 'r')
-    keywords_dict = {}
-    keypath = []
-    curr_dict = keywords_dict
-    def nest_keys(hsdf): # recursive build nested-key
-        global curr_dict
+import sys
+
+'''
+Reading and writing HSD input file of DFTB+
+Keywords are restricted to CamelCase as written in official manual
+'''
+
+special_keys = [ # keywords with content not suitable for recursive dictionary parsing  
+        #'ProjectStates',  # Repeated 'Region' key
+        'KPointsAndWeights', # lines of arrays
+        ]
+
+class Read_HSD: 
+
+    def __init__(self, fname = 'dftb_in.hsd'):
+        self.hsdf = open(fname, 'r')
+        self.keypath = []
+        self.keywords_dict = {}
+        self.curr_dict = self.keywords_dict
+
+    def nest_keys(self): # recursive build nested-key
         while True:
-            line = hsdf.readline()
-            if not line: # Meet EOF
-                break
-            elif '}' in line: # break current recurse, find parent dictionary
-                del keypath[-1]
-                curr_dict = dict_from_path(keypath, keywords_dict) # backward 1 depth
-                break
-            elif line.strip() =='': # Blank line
-                pass
-            elif '{' in line: # meet recurse
+            line = self.hsdf.readline()
+            if '{' in line: # dict depth forward
+                sys.stdout.write(line[:-1]+ '    # DEPTH FORWARD\n')
                 try: # key has attribute
                     key = line[0:line.index('=')].strip()
                 except ValueError: # key without attribute
                     key = line[0:line.index('{')].strip()
-                curr_dict[key] = {} # initialize new key:dictionary
-                keypath.append(key)
-                curr_dict = dict_from_path(keypath, keywords_dict) # forward 1 depth
-                nest_keys(hsdf) 
-            else: # Normal key 
+                self.curr_dict = dict_from_path(self.keypath, self.keywords_dict) 
+                self.curr_dict[key] = {} # initialize new key:dictionary
+                self.keypath.append(key)
+                self.curr_dict = self.curr_dict[key] # forward 1 depth
+                #print(self.keypath, '   # AFTER FORWARD')
+                if key in special_keys: # call function read special blocks
+                    getattr(self, 'read_'+key.lower())
+                self.nest_keys() 
+            elif '=' in line: # Normal key 
+                sys.stdout.write(line[:-1]+'    # Normal KEY-VALUE\n')
                 pass
-    nest_keys(hsdf)
-    return keywords_dict
+            elif '}' in line: # dict depth backward, break current recursion
+                sys.stdout.write(line[:-1]+ '    # DEPTH BACKWARD\n')
+                del self.keypath[-1] # backward 1 depth
+                #print(self.keypath, '   # AFTER BACKWARD')
+                break
+            elif not line: # Meet EOF
+                sys.stdout.write('# MEET EOF')
+                break
+            elif line.strip() =='': # Blank line, don't put this before EOF
+                sys.stdout.write('    # BLANK LINE\n')
+                pass
+            else:
+                sys.stdout.write(line[:-1]+'    # NOT ASSIGNED CONDITION!!\n')
+                pass
 
-def dict_from_path(keypath, dictroot):
+    def read_kpointsandweights(self):
+        while True:
+            line = self.hsdf.readline()
+            if '}' in line: # dict depth backward
+                sys.stdout.write(line[:-1]+ '    # DEPTH BACKWARD\n')
+                del self.keypath[-1] # backward 1 depth
+                break
+
+    def read_projectstates(self):
+        while True:
+            line = self.hsdf.readline()
+            if '}' in line: # dict depth backward
+                sys.stdout.write(line[:-1]+ '    # DEPTH BACKWARD\n')
+                del self.keypath[-1] # backward 1 depth
+                break
+
+    def get_keydict(self):
+        self.nest_keys()
+        return self.keywords_dict
+
+def dict_from_path(keypath, dictroot): 
+    '''
+    Auxiliary function locate to a depth of nested dictionary
+    with path indicated by keypath list.
+    '''
     d = dictroot
     for key in keypath:
         d = d[key]
     return d
 
-special_keys = [ 'ProjectStates' ]
-
 def write_hsd(keywords_dict, hsdf, indent=0):
     for key, value in keywords_dict.items():
-        print('\t'*indent + key)
+        hsdf.write('\t'*indent + key + '\n')
         if isinstance(value, dict):
             write_hsd(value, hsdf, indent+1)
         else:
-            print('\t'*indent + key+': '+str(value))
+            hsdf.write('\t'*indent + key+': '+str(value) + '\n')
+
+
