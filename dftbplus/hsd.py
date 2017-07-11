@@ -1,6 +1,8 @@
 
+import re
 import sys
 import builtins
+from crewp.io.array import read_2darry, wrt_2darry
 
 '''
 Reading and writing HSD input file of DFTB+
@@ -54,9 +56,9 @@ def get_key_val(line, keywords_type):
         val = autoconv( valstr, key, keywords_type )
         return key, val
 
-special_keys = [ # keywords with content not suitable for recursive dictionary parsing  
-        #'Geometry', #
-        'MaxAngularMomentum', #
+special_blocks = [ # keywords with content not suitable for recursive dictionary parsing  
+        'Geometry', # Gen form or read isolated file
+        'MaxAngularMomentum', # Keys are atomic symbols, value could be complicated
         'ProjectStates',  # Repeated 'Region' key
         'KPointsAndWeights', # lines of arrays
         ]
@@ -75,6 +77,7 @@ class Read_HSD:
 
     def __init__(self, fname = 'dftb_in.hsd'):
         self.hsdf = open(fname, 'r')
+        self.logf = open('read_hsd.log', 'w')
         self.keypath = []
         self.nestkeys = {}
         self.curr_dict = self.nestkeys
@@ -83,7 +86,7 @@ class Read_HSD:
         while True:
             line = self.hsdf.readline()
             if '{' in line: # dict depth forward
-                sys.stdout.write(line[:-1]+ '    # DEPTH FORWARD\n')
+                self.logf.write(line[:-1]+ '    # DEPTH FORWARD\n')
                 try: # key has attribute
                     key = line[0:line.index('=')].strip()
                     key_attr = line[ line.index('=')+1 : line.index('{') ].strip()
@@ -94,13 +97,16 @@ class Read_HSD:
                 self.curr_dict[key] = {} # initialize new key:dictionary
                 self.keypath.append(key)
                 self.curr_dict = self.curr_dict[key] # forward 1 depth
-                if key_attr:
+                if key_attr: 
                     self.curr_dict['key_attr'] = key_attr
-                if key in special_keys: # call function read special blocks
+                if key in special_blocks: # call function read special blocks
                     getattr(self, 'read_'+key.lower())()
                 self.nest_keys() 
+            elif not line: # Meet EOF
+                self.logf.write('# MEET EOF\n')
+                break
             elif ('=' in line) and ('{' not in line): # Normal key[unit]-value
-                sys.stdout.write(line[:-1]+'    # Normal KEY-VALUE\n')
+                self.logf.write(line[:-1]+'    # Normal KEY-VALUE\n')
                 sep = get_key_val(line, keywords_type)
                 if len(sep)==3: # expect key have units
                     key, unit, val = sep
@@ -109,34 +115,48 @@ class Read_HSD:
                     key, val = sep
                     self.curr_dict[key] = val
             elif '}' in line: # dict depth backward, break current recursion
-                sys.stdout.write(line[:-1]+ '    # DEPTH BACKWARD\n')
+                self.logf.write(line[:-1]+ '    # DEPTH BACKWARD\n')
                 del self.keypath[-1] # backward 1 depth
                 break
-            elif not line: # Meet EOF
-                print(self.keypath)
-                sys.stdout.write('# MEET EOF\n')
-                #sys.stdout.write(self.keypath)
+            elif line.strip()=='': # Blank line, don't put this before EOF
+                self.logf.write('    # BLANK LINE\n')
+                pass
+            else: # meet unmatched pattern, please add new 'elif'.
+                self.logf.write(line[:-1]+'    # NOT ASSIGNED CONDITION!!\n')
                 break
-            elif line.strip() =='': # Blank line, don't put this before EOF
-                sys.stdout.write('    # BLANK LINE\n')
-                pass
-            else:
-                sys.stdout.write(line[:-1]+'    # NOT ASSIGNED CONDITION!!\n')
-                pass
+
+    def read_geometry(self):
+        if 'key_attr' in self.curr_dict and \
+        self.curr_dict['key_attr']=='GenFormat':
+            while True:
+                line = self.hsdf.readline()
+                if '<<<' in line:
+                    genfname = line.strip().strip('<').strip().strip('"')
+                    self.curr_dict['genfname'] = genfname
+                elif '}' in line: # dict depth backward
+                    self.logf.write(line[:-1]+ '    # DEPTH BACKWARD\n')
+                    del self.keypath[-1] # backward 1 depth
+                    break
 
     def read_maxangularmomentum(self):
         while True:
             line = self.hsdf.readline()
-            if '}' in line: # dict depth backward
-                sys.stdout.write(line[:-1]+ '    # DEPTH BACKWARD\n')
+            if '=' in line:
+                key, val = [ s.strip() for s in line.split('=') ]
+                self.curr_dict[key] = val
+            elif '}' in line: # dict depth backward
+                self.logf.write(line[:-1]+ '    # DEPTH BACKWARD\n')
                 del self.keypath[-1] # backward 1 depth
                 break
 
     def read_kpointsandweights(self):
+        if self.curr_dict['key_attr'] == 'SupercellFolding':
+            self.curr_dict['kmesh'] = read_2darry( self.hsdf, 3, 'int')
+            self.curr_dict['kshift'], = read_2darry( self.hsdf, 1, 'float')
         while True:
             line = self.hsdf.readline()
             if '}' in line: # dict depth backward
-                sys.stdout.write(line[:-1]+ '    # DEPTH BACKWARD\n')
+                self.logf.write(line[:-1]+ '    # DEPTH BACKWARD\n')
                 del self.keypath[-1] # backward 1 depth
                 break
 
@@ -159,12 +179,13 @@ class Read_HSD:
                     key, val = get_key_val(line, keywords_type)
                     region_dict[key] = val
             elif '}' in line: # dict depth backward
-                sys.stdout.write(line[:-1]+ '    # DEPTH BACKWARD\n')
+                self.logf.write(line[:-1]+ '    # DEPTH BACKWARD\n')
                 del self.keypath[-1] # backward 1 depth
                 break
 
     def get_keydict(self):
         self.nest_keys()
+        self.logf.close()
         return self.nestkeys
 
 class Write_HSD:
@@ -172,24 +193,35 @@ class Write_HSD:
     def __init__(self, nestkeys, hsdf, ):
         self.hsdf = hsdf
         self.nestkeys = nestkeys
-        self.write_hsd(self.nestkeys)
+        self.write_hsd(self.nestkeys, 0)
 
-    def write_hsd(self, nestdict, indent=0):
+    def write_hsd(self, nestdict, ndepth):
         for key, value in nestdict.items():
             if isinstance(value, dict): # depth forward
                 if 'key_attr' in value:
-                    self.hsdf.write('\t'*indent+key+' = '+value['key_attr']+' {\n')
+                    self.hsdf.write('  '*ndepth+key+' = '+value['key_attr']+' {\n')
                 else:
-                    self.hsdf.write('\t'*indent+key+' = '+' {\n')
-                self.write_hsd(value, indent+1)
-                self.hsdf.write('\t'*indent+'}\n')
+                    self.hsdf.write('  '*ndepth+key+' = '+' {\n')
+                if key in special_blocks:
+                    self.curr_dict = value
+                    getattr(self, 'write_'+key.lower())(ndepth+1)
+                else:
+                    self.write_hsd(value, ndepth+1)
+                self.hsdf.write('  '*ndepth+'}\n')
             elif key !='key_attr': # normal key-value
-                self.hsdf.write('\t'*indent + key + ' = ' + str(value) + '\n')
+                self.hsdf.write('  '*ndepth + key + ' = ' + str(value) + '\n')
 
-    def write_projectstates(self):
+    def write_geometry(self, ndepth):
+        if 'key_attr' in self.curr_dict and \
+        self.curr_dict['key_attr']=='GenFormat':
+            self.hsdf.write('  '*ndepth + '<<< ' + self.curr_dict['genfname'] + '\n')
+
+    def write_maxangularmomentum(self, ndepth):
         pass
 
-    def write_geometry():
+    def write_kpointsandweights(self, ndepth):
         pass
 
+    def write_projectstates(self, ndepth):
+        pass
 
