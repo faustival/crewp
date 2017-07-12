@@ -59,7 +59,7 @@ def auto_str(val, ):
     elif type(val)==int: 
         valstr = '{:d}'.format(val)
     elif type(val)==float:
-        valstr = '{13.8e}'.format(val)
+        valstr = '{:13.8e}'.format(val)
     elif type(val)==str:
         valstr = val.strip()
     else:
@@ -205,10 +205,11 @@ class Read_HSD:
 
 class Write_HSD:
 
-    def __init__(self, nestkeys, hsdf, ):
-        self.hsdf = hsdf
+    def __init__(self, nestkeys, fname='dftb_in.hsd', ):
+        self.hsdf = open(fname, 'w')
         self.nestkeys = nestkeys
         self.write_hsd(self.nestkeys, 0)
+        self.hsdf.close()
 
     def write_key_val(self, ndepth, key, val, ):
         '''
@@ -216,28 +217,28 @@ class Write_HSD:
         '''
         self.hsdf.write('  '*ndepth + key)
         if isinstance(val, tuple): # key has [unit]
-            self.hsdf.write(' ['+ str(val(0)) + ' ] = ' + auto_str(val[1]) )
+            self.hsdf.write(' ['+ str(val[0]) + '] = ' + auto_str(val[1]) )
         else:
             self.hsdf.write( ' = ' + auto_str(val) )
         self.hsdf.write('\n')
 
     def write_hsd(self, nestdict, ndepth):
-        for key, value in nestdict.items():
-            if isinstance(value, dict): # depth forward
-                if 'key_attr' in value:
-                    self.hsdf.write('  '*ndepth+key+' = '+value['key_attr']+' {\n')
+        for key, val in nestdict.items():
+            if isinstance(val, dict): # depth forward
+                if 'key_attr' in val:
+                    self.hsdf.write('  '*ndepth+key+' = '+val['key_attr']+' {\n')
                 else:
                     self.hsdf.write('  '*ndepth+key+' = '+' {\n')
                 if key in special_blocks:
-                    self.curr_dict = value
+                    self.curr_dict = val
                     getattr(self, 'write_'+key.lower())(ndepth+1)
                 else:
-                    self.write_hsd(value, ndepth+1)
+                    self.write_hsd(val, ndepth+1)
                 self.hsdf.write('  '*ndepth+'}\n')
                 if ndepth==0:
                     self.hsdf.write('\n')
-            elif key !='key_attr': # normal key-value
-                self.hsdf.write('  '*ndepth + key + ' = ' + str(value) + '\n')
+            elif key !='key_attr': # normal key-val
+                self.write_key_val(ndepth, key, val)
 
     def write_geometry(self, ndepth):
         if 'key_attr' in self.curr_dict and \
@@ -259,5 +260,6 @@ class Write_HSD:
             self.hsdf.write('  '*(ndepth+1) + 'Label = ' + key + '\n')
             for key1, val1 in self.curr_dict[key].items():
                 self.write_key_val(ndepth+1, key1, val1)
+            self.hsdf.write('  '*ndepth + '}\n')
 
 
