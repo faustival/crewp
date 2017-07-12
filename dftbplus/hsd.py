@@ -1,5 +1,6 @@
 
 import re
+import numpy as np
 import sys
 import builtins
 from crewp.io.array import read_2darry, wrt_2darry
@@ -9,7 +10,7 @@ Reading and writing HSD input file of DFTB+
 Keywords are restricted to CamelCase as written in official manual
 '''
 
-type_keywords = { 
+type_key = { 
              'float' : { 
                          'SCCTolerance',
                          'Temperature',
@@ -31,30 +32,7 @@ type_keywords = {
             }
 
 # build inverse relation
-keywords_type = {value: key for key, values in type_keywords.items() for value in values}
-
-def autoconv(valstr, key, keywords_type):
-    if 'yes' in valstr.lower(): # expect key to be boolean
-        val = True
-    elif 'no' in valstr.lower():
-        val = False
-    else: # expect type conversion
-        typeconvfunc = keywords_type[key]
-        val = getattr(builtins, typeconvfunc)(valstr)
-    return val
-
-def get_key_val(line, keywords_type):
-    l_str, r_str = [ s.strip() for s in line.split('=') ]
-    valstr = r_str.split()[0]
-    if '[' in l_str: # expect key have units
-        unit = line[ line.index('[')+1 : line.index(']') ].strip()
-        key = line[ : line.index('[') ].strip()
-        val = autoconv( valstr, key, keywords_type )
-        return key, unit, val
-    else:
-        key = l_str
-        val = autoconv( valstr, key, keywords_type )
-        return key, val
+key_type = {value: key for key, values in type_key.items() for value in values}
 
 special_blocks = [ # keywords with content not suitable for recursive dictionary parsing  
         'Geometry', # Gen form or read isolated file
@@ -62,6 +40,44 @@ special_blocks = [ # keywords with content not suitable for recursive dictionary
         'ProjectStates',  # Repeated 'Region' key
         'KPointsAndWeights', # lines of arrays
         ]
+
+def autoconv(valstr, key, key_type):
+    if 'yes' in valstr.lower(): # expect key to be boolean
+        val = True
+    elif 'no' in valstr.lower():
+        val = False
+    else: # expect type conversion
+        typeconvfunc = key_type[key]
+        val = getattr(builtins, typeconvfunc)(valstr)
+    return val
+
+
+def auto_str(val, ):
+    if type(val)==bool: 
+        if val: valstr = 'Yes'
+        else: valstr = 'No'
+    elif type(val)==int: 
+        valstr = '{:d}'.format(val)
+    elif type(val)==float:
+        valstr = '{13.8e}'.format(val)
+    elif type(val)==str:
+        valstr = val.strip()
+    else:
+        sys.exit('Function: auto_str: '+ str(val) + ', type not defined !!\n')
+    return valstr
+
+def get_key_val(line, key_type):
+    l_str, r_str = [ s.strip() for s in line.split('=') ]
+    valstr = r_str.split()[0]
+    if '[' in l_str: # expect key have units
+        unit = line[ line.index('[')+1 : line.index(']') ].strip()
+        key = line[ : line.index('[') ].strip()
+        val = autoconv( valstr, key, key_type )
+        return key, unit, val
+    else:
+        key = l_str
+        val = autoconv( valstr, key, key_type )
+        return key, val
 
 def dict_from_path(keypath, dictroot): 
     '''
@@ -107,7 +123,7 @@ class Read_HSD:
                 break
             elif ('=' in line) and ('{' not in line): # Normal key[unit]-value
                 self.logf.write(line[:-1]+'    # Normal KEY-VALUE\n')
-                sep = get_key_val(line, keywords_type)
+                sep = get_key_val(line, key_type)
                 if len(sep)==3: # expect key have units
                     key, unit, val = sep
                     self.curr_dict[key] = (unit, val)
@@ -122,8 +138,7 @@ class Read_HSD:
                 self.logf.write('    # BLANK LINE\n')
                 pass
             else: # meet unmatched pattern, please add new 'elif'.
-                self.logf.write(line[:-1]+'    # NOT ASSIGNED CONDITION!!\n')
-                break
+                sys.exit('Class Read_HSD: '+line[:-1]+'    # NOT ASSIGNED CONDITION!!\n')
 
     def read_geometry(self):
         if 'key_attr' in self.curr_dict and \
@@ -171,12 +186,12 @@ class Read_HSD:
                         break
                     elif '=' in line: # find 'Label' to build dictionary
                         if 'Label' in line:
-                            _, val = get_key_val(line, keywords_type)
+                            _, val = get_key_val(line, key_type)
                             region_dict = self.curr_dict[val] = {}
                         else:
                             linelist.append(line)
                 for line in linelist: # fill in Region dictionary
-                    key, val = get_key_val(line, keywords_type)
+                    key, val = get_key_val(line, key_type)
                     region_dict[key] = val
             elif '}' in line: # dict depth backward
                 self.logf.write(line[:-1]+ '    # DEPTH BACKWARD\n')
@@ -195,6 +210,17 @@ class Write_HSD:
         self.nestkeys = nestkeys
         self.write_hsd(self.nestkeys, 0)
 
+    def write_key_val(self, ndepth, key, val, ):
+        '''
+        write single line pattern: key [unit] = val
+        '''
+        self.hsdf.write('  '*ndepth + key)
+        if isinstance(val, tuple): # key has [unit]
+            self.hsdf.write(' ['+ str(val(0)) + ' ] = ' + auto_str(val[1]) )
+        else:
+            self.hsdf.write( ' = ' + auto_str(val) )
+        self.hsdf.write('\n')
+
     def write_hsd(self, nestdict, ndepth):
         for key, value in nestdict.items():
             if isinstance(value, dict): # depth forward
@@ -208,6 +234,8 @@ class Write_HSD:
                 else:
                     self.write_hsd(value, ndepth+1)
                 self.hsdf.write('  '*ndepth+'}\n')
+                if ndepth==0:
+                    self.hsdf.write('\n')
             elif key !='key_attr': # normal key-value
                 self.hsdf.write('  '*ndepth + key + ' = ' + str(value) + '\n')
 
@@ -217,11 +245,19 @@ class Write_HSD:
             self.hsdf.write('  '*ndepth + '<<< ' + self.curr_dict['genfname'] + '\n')
 
     def write_maxangularmomentum(self, ndepth):
-        pass
+        for key, val in self.curr_dict.items():
+            self.hsdf.write('  '*ndepth + key + ' = ' + val + '\n')
 
     def write_kpointsandweights(self, ndepth):
-        pass
+        if self.curr_dict['key_attr'] == 'SupercellFolding':
+            wrt_2darry( self.curr_dict['kmesh'], title='', rowtags='  '*ndepth, f=self.hsdf, convtype='int' )
+            wrt_2darry( np.array( [ self.curr_dict['kshift'] ] ), title='', rowtags='  '*ndepth, f=self.hsdf )
 
     def write_projectstates(self, ndepth):
-        pass
+        for key, val in self.curr_dict.items():
+            self.hsdf.write('  '*ndepth + 'Region {\n')
+            self.hsdf.write('  '*(ndepth+1) + 'Label = ' + key + '\n')
+            for key1, val1 in self.curr_dict[key].items():
+                self.write_key_val(ndepth+1, key1, val1)
+
 

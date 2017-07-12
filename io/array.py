@@ -3,12 +3,13 @@ import numpy as np
 import sys
 import builtins
 
-def wrt_2darry(arry2, title, rowtags='', f=sys.stdout):
+def wrt_2darry(arry2, title, rowtags='', f=sys.stdout, convtype='float', ):
     '''
     Printing 2-index array, i.e., matrix
     rowtags: should be none, or sequence match row number of arry2 
     '''
-    f.write(title+'\n')
+    if title:
+        f.write(title+'\n')
     if rowtags: # determine type and print format of rowtag
         if type(rowtags[0])==str: # treat tags as string
             tagfmt = '{:5s}'
@@ -16,13 +17,16 @@ def wrt_2darry(arry2, title, rowtags='', f=sys.stdout):
             tagfmt = '{:5d}'
         for i, vec in enumerate(arry2): # iterating rows
             rowtag = tagfmt.format(rowtags[i])
-            f.write( '   '+rowtag+' '.join( '{:13.8f}'.format(entry) for entry in vec ) )
+            if convtype=='float':
+                f.write( '   '+rowtag+' '.join( '{:13.8f}'.format(entry) for entry in vec ) )
+            elif convtype=='int':
+                f.write( '   '+rowtag+' '.join( '{:d}'.format(entry) for entry in vec ) )
             f.write('\n')
     elif not rowtags: # no row tags
         for vec in arry2: # iterating rows
             f.write( '   '+' '.join( '{:13.8f}'.format(entry) for entry in vec ) )
             f.write('\n')
-    f.write('\n')
+    #f.write('\n')
 
 def wrt_3darry(arry3, title, f=sys.stdout):
     '''
