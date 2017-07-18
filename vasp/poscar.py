@@ -28,3 +28,6 @@ class Poscar:
 
     def get_constraint(self):
         return self.constraint
+
+    def get_coordinates(self):
+        return self.coordinates
