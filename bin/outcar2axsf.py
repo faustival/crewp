@@ -12,7 +12,7 @@ else:
 
 print('Reading VASP OUTCAR filetype, ', outcarfname)
 outcar = Outcar(outcarfname)
-outcar.get_latvecs()
+outcar.read_latvecs()
 outcar.auto_creep()
 
 # get selective dynamics constraint in POSCAR

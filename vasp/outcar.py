@@ -12,11 +12,11 @@ class Outcar:
     '''
     def __init__(self, fname):
         self.fname = fname
-        self.get_nions()
-        self.get_elements()
-        self.get_atomlist()
+        self.read_nions()
+        self.read_elements()
+        self.gen_atomlist()
 
-    def get_nions(self):
+    def read_nions(self):
         outcarf = open(self.fname, 'r')
         while True:
             line = outcarf.readline()
@@ -30,7 +30,7 @@ class Outcar:
         self.n_iontype = len(n_ionlist)
         self.n_ionlist = n_ionlist
 
-    def get_elements(self):
+    def read_elements(self):
         elements = []
         outcarf = open(self.fname, 'r')
         '''
@@ -52,7 +52,7 @@ class Outcar:
         outcarf.close()
         self.elements = elements
 
-    def get_atomlist(self):
+    def gen_atomlist(self):
         atomlist = []
         for i, element in enumerate(self.elements):
             atomlist += [element]*self.n_ionlist[i]
@@ -62,7 +62,10 @@ class Outcar:
     The following methods was not initiated in __init__(self)
     '''
 
-    def get_latvecs(self):
+    def get_atomlist(self):
+        return self.atomlist
+
+    def read_latvecs(self):
         '''
         Lattice vectors
         '''

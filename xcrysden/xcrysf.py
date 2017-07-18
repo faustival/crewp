@@ -27,6 +27,7 @@ def wrt_anim(primvec, anim_coords, atomlist, axsfname='anim_xcrys.axsf', ):
         title_coord = '{:s} {:d}'.format('PRIMCOORD', i_step+1)+'\n' \
                       + '   {:d}    {:d}'.format(natoms, 1)
         wrt_2darry(anim_step, title_coord, rowtags=atomlist, f=axsf)
+        axsf.write( '\n' )
     axsf.close()
 
 

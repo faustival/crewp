@@ -16,7 +16,13 @@ class Poscar:
         self.scaling = float(line)
         self.cell = read_2darry(poscarf, 3) # cell vectors (3,3)
         line = poscarf.readline() # same as 'ions per type' in OUTCAR
-        self.n_ions = np.array([ int(i) for i in line.split() ])
+        while True: # search for number list of atom
+            line = poscarf.readline() 
+            try:
+                self.n_ions = np.array([ int(i) for i in line.split() ])
+                break
+            except ValueError:
+                pass
         line = poscarf.readline()
         tag_char = line.strip()[0]
         if tag_char in ('S', 's'): # Selective dynamics
@@ -26,8 +32,13 @@ class Poscar:
             self.coordinates = np.array(cols[:3]).astype(np.float).transpose()
             self.constraint = (np.array(cols[3:]).transpose() == 'T')
 
+    def get_cell(self):
+        return self.cell
+
     def get_constraint(self):
         return self.constraint
 
     def get_coordinates(self):
         return self.coordinates
+
+
