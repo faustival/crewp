@@ -1,5 +1,6 @@
 
 import numpy as np
+from crewp.lattice.lattice import frac2cart
 from crewp.io.array import read_2darry
 from crewp.io.table import read_table
 
@@ -24,12 +25,16 @@ class Poscar:
             except ValueError:
                 pass
         line = poscarf.readline()
-        tag_char = line.strip()[0]
-        if tag_char in ('S', 's'): # Selective dynamics
+        if line.strip()[0] in ('S','s'): # Selective dynamics
+            self.selectdyn = True
             line = poscarf.readline()
+            if line.strip()[0] in ('D','d'):
+                self.ifcartesian = False
             coord_constr = read_table(poscarf)
             cols = list(zip(*coord_constr))
             self.coordinates = np.array(cols[:3]).astype(np.float).transpose()
+            if not self.ifcartesian:
+                self.coordinates = frac2cart( self.coordinates, self.cell )
             self.constraint = (np.array(cols[3:]).transpose() == 'T')
 
     def get_cell(self):
