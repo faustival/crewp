@@ -38,6 +38,7 @@ class ParseXML:
             sys.exit('From crewp.vasp.parsexml.ParseXML, ' \
                       +'file does not exist: '+fname)
         self.xmltree = etr.parse(fname)
+        self.get_atomlist()
 
     def varray2darry(self, elem_varray, vtype='float',):
         '''
@@ -58,7 +59,7 @@ class ParseXML:
         Only for varray matching ``xpathcode`` ONCE
         '''
         elem_varray = self.xmltree.xpath(xpathcode) # note to unpack 
-        if len(elem_varray) != 1:
+        if len(elem_varray) > 1:
             sys.exit('From get_varray, xpathcode returns not ONLY ONE match!')
         elem_varray, = elem_varray
         if ('type' in elem_varray.attrib) and (elem_varray.attrib['type']=="logical"): # boolean array
@@ -81,10 +82,22 @@ class ParseXML:
             varray_steps.append(varray)
         return np.array(varray_steps)
 
+    '''
+    Exact get info from xml output
+    '''
+
     def get_atomlist(self, ):
         elem_atomlist = self.xmltree.xpath('//atominfo/array[@name="atoms"]/set/rc/c[1]')
-        atomlist = [ elem.text for elem in elem_atomlist]
-        return atomlist
+        self.atomlist = [ elem.text for elem in elem_atomlist]
+        self.natoms = len(self.atomlist)
+        return self.atomlist
+
+    def get_selectdyn(self, ):
+        try:
+            self.selectdynarry = self.get_varray(xpath_dict['selectdyn_init'],) # boolean
+        except ValueError: # no content of xpath: selective
+            self.selectdynarry = np.full( (self.natoms, 3), True )
+        return self.selectdynarry
 
     def get_vibeig_coord(self, ):
         '''
@@ -93,9 +106,9 @@ class ParseXML:
             to adapt natom*3 coordinate-type arrays.
         vibeig_coord: shape( ndof, natoms, 3 )
         '''
+        natoms = self.natoms
+        selectdynarry = self.get_selectdyn()
         eigarry = self.get_varray(xpath_dict['vib_eigvec'],)
-        selectdynarry = self.get_varray(xpath_dict['selectdyn_init'],) # boolean
-        natoms = selectdynarry.shape[0] # number of atoms
         ndof = eigarry.shape[0] # number of degree of freedoms
         selectdynarry1d = np.reshape(selectdynarry, (3*natoms), )
         eigaugarry = np.zeros((3*natoms, ndof))
@@ -118,7 +131,7 @@ class ParseXML:
         if -1 <= ibrion <= 3: # ionic steps
             position_steps_frac = self.get_3dvarray(xpath_dict['position_steps'],) # fractional coordinate
             force_steps = self.get_3dvarray(xpath_dict['force_steps'],)
-            selectdynarry = self.get_varray(xpath_dict['selectdyn_init'],) # boolean
+            selectdynarry = self.get_selectdyn()
             force_steps[:, selectdynarry==False ] = 0. # mask constraint for forces
             if 0 <= isif <= 2 : # fixed cell
                 latvec = self.get_varray(xpath_dict['latvec_init'],) # 2d-array
