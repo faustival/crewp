@@ -14,9 +14,12 @@ type_key = {
              'float' : { 
                          'SCCTolerance',
                          'Temperature',
+                         'MixingParameter',
                         },
              'int': {
                          'ParserVersion',
+                         'MaxSCCIterations',
+                         'CachedIterations',
                         },
              'str': { 
                          'Prefix', 
