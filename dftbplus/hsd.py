@@ -99,8 +99,10 @@ class Read_HSD:
         self.curr_dict = self.nestkeys
 
     def nest_keys(self): # recursive build nested-key
-        while True:
-            line = self.hsdf.readline()
+        line = self.hsdf.readline()
+        if not line: # Meet EOF
+            self.logf.write('# MEET EOF\n')
+        else:
             if '{' in line: # dict depth forward
                 self.logf.write(line[:-1]+ '    # DEPTH FORWARD\n')
                 try: # key has attribute
@@ -118,14 +120,9 @@ class Read_HSD:
                 if key in special_blocks: # call function read special blocks
                     getattr(self, 'read_'+key.lower())()
                     self.curr_dict = dict_from_path(self.keypath, self.nestkeys) 
-                self.nest_keys() 
             elif '}' in line: # dict depth backward, break current recursion
                 self.logf.write(line[:-1]+ '    # DEPTH BACKWARD\n')
                 del self.keypath[-1] # backward 1 depth
-                break
-            elif not line: # Meet EOF
-                self.logf.write('# MEET EOF\n')
-                break
             elif ('=' in line) and ('{' not in line): # Normal key[unit]-value
                 self.logf.write(line[:-1]+'    # Normal KEY-VALUE\n')
                 sep = get_key_val(line, key_type)
@@ -140,6 +137,7 @@ class Read_HSD:
                 pass
             else: # meet unmatched pattern, please add new 'elif'.
                 sys.exit('Class Read_HSD: '+line[:-1]+'    # NOT ASSIGNED CONDITION!!\n')
+            self.nest_keys()
 
     def read_geometry(self):
         if 'key_attr' in self.curr_dict and \
