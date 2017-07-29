@@ -117,7 +117,12 @@ class Read_HSD:
                     self.curr_dict['key_attr'] = key_attr
                 if key in special_blocks: # call function read special blocks
                     getattr(self, 'read_'+key.lower())()
+                    self.curr_dict = dict_from_path(self.keypath, self.nestkeys) 
                 self.nest_keys() 
+            elif '}' in line: # dict depth backward, break current recursion
+                self.logf.write(line[:-1]+ '    # DEPTH BACKWARD\n')
+                del self.keypath[-1] # backward 1 depth
+                break
             elif not line: # Meet EOF
                 self.logf.write('# MEET EOF\n')
                 break
@@ -130,10 +135,6 @@ class Read_HSD:
                 elif len(sep)==2:
                     key, val = sep
                     self.curr_dict[key] = val
-            elif '}' in line: # dict depth backward, break current recursion
-                self.logf.write(line[:-1]+ '    # DEPTH BACKWARD\n')
-                del self.keypath[-1] # backward 1 depth
-                break
             elif line.strip()=='': # Blank line, don't put this before EOF
                 self.logf.write('    # BLANK LINE\n')
                 pass
