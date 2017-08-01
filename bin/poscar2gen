@@ -1,0 +1,31 @@
+#! /usr/bin/env python3
+
+import sys
+from crewp.vasp.outcar import Outcar
+from crewp.vasp.poscar import Poscar
+from ase import Atoms, Atom
+from ase.io import write
+
+'''
+Usage:
+    poscar2gen [outcar_name] [poscar/contcar_name] {genfname}
+'''
+
+outcarf, poscarf = sys.argv[1:3]
+
+outcar = Outcar(outcarf)
+poscar = Poscar(poscarf)
+
+try:
+    genfname = sys.argv[3]
+except IndexError:
+    genfname = 'geoinp.gen'
+
+atomlist = outcar.get_atomlist()
+coordinates = poscar.get_coordinates()
+cell = poscar.get_cell()
+atom_coord = [ Atom( atomlist[i] , coordinates[i] ) for i in range(len(atomlist)) ]
+myatoms = Atoms ( atom_coord, cell=cell, pbc=True, )
+
+write(genfname, myatoms)
+

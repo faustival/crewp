@@ -1,0 +1,26 @@
+#! /usr/bin/env python3
+
+import sys
+import importlib
+from ase.io import write
+
+'''
+import structure object from ASE file,
+write DFTB+ .gen file.
+
+Usage:
+    ase2gen [ase_geom_file.py] {genfile_name}
+'''
+
+# import bulk_configuration from ASE module
+geomfname = sys.argv[1]
+modname = geomfname.rstrip(".py")
+geom_module = importlib.import_module(modname)
+
+try:
+    genfname = sys.argv[2]
+except IndexError:
+    genfname = 'geoinp.gen'
+
+write(genfname, geom_module.bulk_configuration)
+
