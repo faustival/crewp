@@ -15,9 +15,12 @@ Usage:
 
 # import bulk_configuration from ASE module
 geomfname = sys.argv[1]
-modname = geomfname.rstrip(".py")
+modname = geomfname.rstrip('.py')
 sys.path.append(os.getcwd()) # some version cannot find module without this
-geom_module = importlib.import_module(modname)
+#geom_module = importlib.import_module(modname)
+geom_module = __import__(modname)
+#globals().update(vars(module))
+#globals().update(namespace)
 
 try:
     genfname = sys.argv[2]
