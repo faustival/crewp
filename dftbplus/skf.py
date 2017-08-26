@@ -31,7 +31,8 @@ class SKF:
     def set_rseq(self):
         '''
         Generate array of radius grid.
-        Check the definition of grid start point, is 0. included, or endpoint included? ( I guess it's endpoint included, so begin from griddist. )
+        Note: start point, R=0. is not included, endpoint is included. 
+        See Line 4 explaination, simple Homo-nuclear case, SKF format description. 
         '''
         self.rseq = np.linspace(self.griddist, self.rcut, self.ngpoints)
 
