@@ -12,7 +12,7 @@ class SKF:
         self.fname = fname
         self.orbtags = [ 'Hdd0', 'Hdd1', 'Hdd2', 'Hpd0', 'Hpd1', 'Hpp0', 'Hpp1', 'Hsd0', 'Hsp0', 'Hss0', 'Sdd0', 'Sdd1', 'Sdd2', 'Spd0', 'Spd1', 'Spp0', 'Spp1', 'Ssd0', 'Ssp0', 'Sss0',]
 
-    def read_simple(self):
+    def read_simple(self, pairtype):
         self.skf = open(self.fname)
         line = self.skf.readline() # 1st line
         w1, w2 = line.split()
@@ -20,7 +20,10 @@ class SKF:
         self.ngpoints = int(w2)
         self.rcut = self.griddist*float(self.ngpoints)
         line = self.skf.readline() # 2nd line missed
-        line = self.skf.readline() # 3rd line missed
+        if pairtype=='homo':
+            line = self.skf.readline() # 3rd line missed
+        else if pairtype=='hetero':
+            pass
         intmat = []
         for i in range(self.ngpoints): # H and S matrix table
             words = self.skf.readline().split() 
@@ -31,8 +34,9 @@ class SKF:
                 except ValueError: # repeat*val format
                     repeat, val = a.split('*')
                     row += [ float(val) ]*int(repeat)
-            intmat.append( row )
-        self.intmat = np.array(intmat).transpose()
+            intmat.append( np.array(row) )
+        self.intmat = np.array(intmat)
+        self.intmat = np.transpose(self.intmat)
         self.skf.close()
 
     def set_rseq(self):

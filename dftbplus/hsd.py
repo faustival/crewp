@@ -126,6 +126,7 @@ class Read_HSD:
             elif '}' in line: # dict depth backward, break current recursion
                 self.logf.write(line[:-1]+ '    # DEPTH BACKWARD\n')
                 del self.keypath[-1] # backward 1 depth
+                self.curr_dict = dict_from_path(self.keypath, self.nestkeys) 
             elif ('=' in line) and ('{' not in line): # Normal key[unit]-value
                 self.logf.write(line[:-1]+'    # Normal KEY-VALUE\n')
                 sep = get_key_val(line, key_type)
