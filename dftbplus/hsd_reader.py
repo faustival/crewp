@@ -139,11 +139,13 @@ class Read_HSD:
     def read_projectstates(self):
         '''
         ProjectStates: { 
-            val_of_Label(region_i if no 'Label') : {
-                                  'Atoms' : '***',
-                                  'ShellResolved' : True,
-                                  ...
-                                }
+            'region_i'  : {
+                              'Atoms' : '***',
+                              'ShellResolved' : True,
+                              'Label' : '***',
+                              ...
+                          },
+            ...
                        }
         '''
         i_region = 0
