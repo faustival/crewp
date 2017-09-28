@@ -1,41 +1,41 @@
 
+from crewp.dftbplus import type_key, key_type, special_blocks, Write_HSD, Read_HSD
+
 '''
 Deal with dictionary containing HSD input key-values of DFTB+
-Keywords are restricted to CamelCase as written in official manual
 '''
 
-type_key = { 
-             'float' : { 
-                         'SCCTolerance',
-                         'Temperature',
-                         'MixingParameter',
-                        },
-             'int': {
-                         'ParserVersion',
-                         'MaxSCCIterations',
-                         'CachedIterations',
-                        },
-             'str': { 
-                         'Prefix', 
-                         'Separator', 
-                         'Suffix', 
-                         'Atoms',
-                         'Label',
-                        },
-             'bool': {
-                         'SCC',
-                         'ShellResolved',
-                        },
-            }
+class HSD:
 
-# build inverse relation
-key_type = {value: key for key, values in type_key.items() for value in values}
+    def __init__(self, fname=None):
+        if fname:
+            self.read_hsdf(fname)
+        else:
+            self.nestkeys = {}
 
-special_blocks = [ # keywords with content not suitable for recursive dictionary parsing  
-        'Geometry', # Gen form or read isolated file
-        'MaxAngularMomentum', # Keys are atomic symbols, value could be complicated
-        'ProjectStates',  # Repeated 'Region' key
-        'KPointsAndWeights', # lines of arrays
-        ]
+    def read_hsdf(self, fname='dftb_in.hsd'):
+        hsdf = Read_HSD(fname)
+        self.nestkeys = hsdf.get_nestkeys()
+
+    def write_hsdf(self, fname='dftb_inp.hsd'):
+        Write_HSD(self.nestkeys, fname)
+
+    def pdos_atoms(self, idx_list, n_rslv=True, l_rslv=True):
+        '''
+        Generate 'ProjectStates' dictionary
+        for PDOS on each atom, index of atom in ``idx_list``
+        should match in geometric specification.
+        '''
+        pdos_keydict = {}
+        for idx in idx_list:
+            pdos_keydict['dos_atom_'+str(idx)] = {
+                    'Atoms' : str(idx),
+                    'ShellResolved' : n_rslv,
+                    'OrbitalResolved' : l_rslv,
+                    }
+        self.nestkeys['Analysis']['ProjectStates'] = pdos_keydict
+
+    def get_nestkeys(self,):
+        return self.nestkeys
 
 

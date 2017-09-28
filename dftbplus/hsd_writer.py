@@ -7,7 +7,7 @@ Write HSD input file of DFTB+
 import numpy as np
 import sys
 from crewp.io.array import wrt_2darry
-from crewp.dftbplus.hsd import type_key, key_type, special_blocks
+from crewp.dftbplus import type_key, key_type, special_blocks
 
 def auto_str(val, ):
     '''

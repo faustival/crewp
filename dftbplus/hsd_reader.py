@@ -7,7 +7,7 @@ Read HSD input file of DFTB+
 import sys
 import builtins
 from crewp.io.array import read_2darry
-from crewp.dftbplus.hsd import type_key, key_type, special_blocks
+from crewp.dftbplus import type_key, key_type, special_blocks
 
 def get_key_val(line, key_type):
     '''
@@ -137,6 +137,9 @@ class Read_HSD:
                 break
 
     def read_projectstates(self):
+        '''
+        ProjectStates: { val_of_Label
+        '''
         while True: # find 'Region' block
             line = self.hsdf.readline()
             if 'Region' in line:
@@ -159,7 +162,7 @@ class Read_HSD:
                 del self.keypath[-1] # backward 1 depth
                 break
 
-    def get_keydict(self):
+    def get_nestkeys(self):
         self.nest_keys()
         self.logf.close()
         return self.nestkeys
