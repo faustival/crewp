@@ -81,7 +81,6 @@ class Write_HSD:
     def write_projectstates(self, ndepth):
         for key, val in self.curr_dict.items():
             self.hsdf.write('  '*ndepth + 'Region {\n')
-            self.hsdf.write('  '*(ndepth+1) + 'Label = ' + key + '\n')
             for key1, val1 in self.curr_dict[key].items():
                 self.write_key_val(ndepth+1, key1, val1)
             self.hsdf.write('  '*ndepth + '}\n')

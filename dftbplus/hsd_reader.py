@@ -138,25 +138,31 @@ class Read_HSD:
 
     def read_projectstates(self):
         '''
-        ProjectStates: { val_of_Label
+        ProjectStates: { 
+            val_of_Label(region_i if no 'Label') : {
+                                  'Atoms' : '***',
+                                  'ShellResolved' : True,
+                                  ...
+                                }
+                       }
         '''
+        i_region = 0
         while True: # find 'Region' block
+            '''
+            Build ``region_dict`` with key 'region_i'
+            Stack other line strings, fill in the ``region_dict`` 
+            '''
             line = self.hsdf.readline()
             if 'Region' in line:
-                linelist = []
-                while True:
+                i_region += 1
+                region_dict = self.curr_dict['region_'+str(i_region)] = {}
+                while True: 
                     line = self.hsdf.readline()
                     if '}' in line: # label escape a 'Region' block
                         break
-                    elif '=' in line: # find 'Label' to build dictionary
-                        if 'Label' in line:
-                            _, val = get_key_val(line, key_type)
-                            region_dict = self.curr_dict[val] = {}
-                        else:
-                            linelist.append(line)
-                for line in linelist: # fill in Region dictionary
-                    key, val = get_key_val(line, key_type)
-                    region_dict[key] = val
+                    elif '=' in line: 
+                        key, val = get_key_val(line, key_type)
+                        region_dict[key] = val
             elif '}' in line: # dict depth backward
                 self.logf.write(line[:-1]+ '    # DEPTH BACKWARD\n')
                 del self.keypath[-1] # backward 1 depth
