@@ -28,10 +28,12 @@ class HSD:
         '''
         pdos_keydict = {}
         for idx in idx_list:
-            pdos_keydict['dos_atom_'+str(idx)] = {
+            key = 'dos_atom_'+str(idx)
+            pdos_keydict[key] = {
                     'Atoms' : str(idx),
                     'ShellResolved' : n_rslv,
                     'OrbitalResolved' : l_rslv,
+                    'Label' : key,
                     }
         if 'Analysis' not in self.nestkeys:
             self.nestkeys['Analysis'] = {}

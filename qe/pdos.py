@@ -3,7 +3,7 @@ import os
 import numpy as np
 import sys
 
-class Atom:
+class PDOS:
 
     def __init__(self, atomid, elem):
         '''
