@@ -33,6 +33,8 @@ class HSD:
                     'ShellResolved' : n_rslv,
                     'OrbitalResolved' : l_rslv,
                     }
+        if 'Analysis' not in self.nestkeys:
+            self.nestkeys['Analysis'] = {}
         self.nestkeys['Analysis']['ProjectStates'] = pdos_keydict
 
     def get_nestkeys(self,):

@@ -1,0 +1,28 @@
+#! /usr/bin/env python3
+
+import sys
+from crewp.dftbplus.hsd import HSD
+from ase.io import read
+
+'''
+Change 'ProjectStates' block in DFTB+ HSD input
+* a model file should be readin.
+* only full atomic projection now.
+Usage:
+    dp_hsd_pdos hsdmodel genfname
+'''
+
+hsdmodel = sys.argv[1]
+genfname = sys.argv[2]
+
+# get atomic info. from .gen geometric file 
+atoms = read(genfname, )
+natom = atoms.get_number_of_atoms()
+
+# parse HSD model file, replace 'ProjectStates' block with atomic PDOS
+hsd = HSD(hsdmodel)
+hsd.pdos_atoms([i for i in range(1, natom+1)], n_rslv=True, l_rslv=False)
+
+hsd.write_hsdf( 'dftb_pdos.hsd')
+print("Replaced 'ProjectStates' to", natom, "atoms projection.")
+
