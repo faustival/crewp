@@ -1,9 +1,14 @@
 
+'''
+Implemented with Python dictionary.
+'''
+
 import numpy as np
 from .qe.atom import Atom
 
 class PDOS:
     '''
+    Implemented with Python dictionary.
     processing PDOS in a single computation, i.e. system sharing same:
     * fermi energy should be naturally the same.
     * energy array

@@ -19,7 +19,7 @@ poscar = Poscar(poscarf)
 try:
     genfname = sys.argv[3]
 except IndexError:
-    genfname = 'geoinp.gen'
+    genfname = 'from_poscar.gen'
 
 atomlist = outcar.get_atomlist()
 coordinates = poscar.get_coordinates()
@@ -27,5 +27,5 @@ cell = poscar.get_cell()
 atom_coord = [ Atom( atomlist[i] , coordinates[i] ) for i in range(len(atomlist)) ]
 myatoms = Atoms ( atom_coord, cell=cell, pbc=True, )
 
-write(genfname, myatoms)
+write(genfname, myatoms, format='gen')
 

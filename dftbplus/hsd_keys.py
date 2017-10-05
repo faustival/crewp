@@ -8,23 +8,27 @@ type_key = {
                          'SCCTolerance',
                          'Temperature',
                          'MixingParameter',
+                         'MaxForceComponent',    # in Driver:[different methods]
+                         'MaxAtomStep',     # in Driver:[different methods]
                         },
              'int': {
                          'ParserVersion',
                          'MaxSCCIterations',
                          'CachedIterations',
+                         'MaxSteps',    # in Driver:[different methods]
                         },
              'str': { 
                          'Prefix', 
                          'Separator', 
                          'Suffix', 
-                         'Atoms',
-                         'Label',
+                         'MovedAtoms',    # in Driver:[different methods]
+                         'Atoms',   # in Analysis:ProjectStates
+                         'Label',   # in Analysis:ProjectStates
                         },
              'bool': {
                          'SCC',
-                         'ShellResolved',
-                         'OrbitalResolved',
+                         'ShellResolved',   # in Analysis:ProjectStates
+                         'OrbitalResolved',   # in Analysis:ProjectStates
                         },
             }
 

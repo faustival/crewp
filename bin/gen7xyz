@@ -18,9 +18,9 @@ genfname = sys.argv[1]
 try:
     xyzfname = sys.argv[2]
 except IndexError:
-    xyzfname = 'geoinp.xyz'
+    xyzfname = 'from_gen.xyz'
 
 atoms = read(genfname, )
 print(atoms)
-write(xyzfname, atoms)
+write(xyzfname, atoms, format='xyz')
 
