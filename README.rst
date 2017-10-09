@@ -1,17 +1,16 @@
 
-
 ******************************
 CrewP: Creeping with Particles
 ******************************
 
 CrewP is creeping with IO of computational electronic structure packages.
 
-The scripts is accumulating with author's adapting to new packages and functions.
+Dependencies:
+=============
 
-Warning:
-========
-
-    Coding fast, Creeping with IO slowly.
+* Python3
+* Numpy, Scipy
+* `ASE <https://wiki.fysik.dtu.dk/ase/index.html>`_
 
 Most concerned packages
 =======================
@@ -21,6 +20,11 @@ Most concerned packages
 * `DFTB+ <https://www.dftbplus.org>`_
 * `XCrySDen <http://www.xcrysden.org>`_
 * `ASE <https://wiki.fysik.dtu.dk/ase/index.html>`_
+
+Warning:
+========
+
+    Coding fast, Creeping with IO slowly.
 
 Epilogue
 ========
