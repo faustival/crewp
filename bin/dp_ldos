@@ -1,0 +1,6 @@
+#! /usr/bin/env python3
+
+from crewp.dftbplus.pdos import PDOS
+
+pdos = PDOS()
+pdos.from_hsd(hsdfname='dftb_in.hsd',)

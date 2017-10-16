@@ -6,6 +6,7 @@ Read HSD input file of DFTB+
 
 import sys
 import builtins
+import re
 from crewp.io.array import read_2darry
 from crewp.dftbplus import type_key, key_type, special_blocks
 
@@ -38,6 +39,8 @@ def autoconv(valstr, key, key_type):
     else: # expect type conversion
         typeconvfunc = key_type[key]
         val = getattr(builtins, typeconvfunc)(valstr)
+        if typeconvfunc == 'str': # replace extra ' and " to a whitespace
+            val = re.sub('"|\'', ' ', val).strip()
     return val
 
 def dict_from_path(keypath, dictroot): 
@@ -119,6 +122,7 @@ class Read_HSD:
             line = self.hsdf.readline()
             if '=' in line:
                 key, val = [ s.strip() for s in line.split('=') ]
+                val = re.sub('"|\'', ' ', val).strip()
                 self.curr_dict[key] = val
             elif '}' in line: # dict depth backward
                 self.logf.write(line[:-1]+ '    # DEPTH BACKWARD\n')
