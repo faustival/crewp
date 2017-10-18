@@ -1,6 +1,34 @@
 #! /usr/bin/env python3
 
-from crewp.dftbplus.pdos import PDOS
+import numpy as np
+from crewp.dftbplus.pdos import PDOS as PDOS_dp
+from crewp.spectra.pdos import PDOS
+import ase.io
 
-pdos = PDOS()
-pdos.from_hsd(hsdfname='dftb_in.hsd',)
+import matplotlib as mpl
+from matplotlib import rc
+import matplotlib.pyplot as plt
+
+genfname = 'geoinp.gen'
+#atom_id_list = [1, 56, 114]
+
+atoms = ase.io.read(genfname)
+coordinates = atoms.get_positions()
+
+#pdos_dp = PDOS_dp()
+#pdos_dp.from_hsd(hsdfname='dftb_in.hsd', atom_id_list=None, broaden=0.1)
+#pdos_df = pdos_dp.get_pdos_df()
+pdos = PDOS(None)
+
+pdos.read_df('pdos_full.dat', header=[0,1] )
+pdos.sum_shell()
+#pdos.write_df('pdos_full.dat', )
+ldos, x_arry, en_arry = pdos.ldos1d(coordinates=coordinates, )
+
+
+x_mesh, en_mesh = np.meshgrid( x_arry, en_arry, indexing='ij' )
+plt.contourf( x_mesh, en_mesh, ldos, 50,)# cmap='RdGy')
+plt.colorbar()
+
+
+plt.show()

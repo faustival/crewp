@@ -9,7 +9,7 @@ Dependencies:
 =============
 
 * Python3
-* Numpy, Scipy
+* Numpy, Scipy, Pandas
 * `ASE <https://wiki.fysik.dtu.dk/ase/index.html>`_
 
 Most concerned packages
