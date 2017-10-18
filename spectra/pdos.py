@@ -12,6 +12,11 @@ class PDOS:
     def __init__(self, pdos_df):
         self.pdos_df = pdos_df
 
+    def shift_fermi(self, fermi):
+        en_arry = self.pdos_df.index.values
+        en_arry -= fermi
+        self.pdos_df.set_index(en_arry)
+
     def ldos1d(self, coordinates, axis=0, margin=10., broaden='Gaussian'):
         '''
         !!!

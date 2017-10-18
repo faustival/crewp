@@ -1,0 +1,35 @@
+#! /usr/bin/env python3
+
+import re
+import numpy as np
+from crewp.dftbplus.pdos import PDOS as PDOS_dp
+from crewp.spectra.pdos import PDOS
+import ase.io
+
+import matplotlib as mpl
+from matplotlib import rc
+import matplotlib.pyplot as plt
+
+genfname = 'geoinp.gen'
+
+def get_fermi_dftbplus(fname='detailed.out'):
+    with open(fname, 'r') as detoupf:
+        for line in detoupf:
+            if re.match('^\s*Fermi level:', line):
+                fermi = float(line.split()[-4])*27.2
+    return fermi
+fermi = get_fermi_dftbplus()
+
+atoms = ase.io.read(genfname)
+coordinates = atoms.get_positions()
+
+# read shell-resolved DFTB+ data
+pdos_dp = PDOS_dp()
+pdos_dp.from_hsd(hsdfname='dftb_in.hsd', atom_id_list=None, broaden=0.1)
+pdos_df = pdos_dp.get_pdos_df()
+
+# write Dataframe
+pdos = PDOS(pdos_df)
+pdos.shift_fermi(fermi)
+pdos.write_df('pdos_df.dat', )
+
