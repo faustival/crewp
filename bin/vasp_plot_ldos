@@ -1,0 +1,38 @@
+#! /usr/bin/env python3
+
+import numpy as np
+from crewp.spectra.pdos import PDOS
+from crewp.vasp.doscar import Doscar
+from crewp.vasp.poscar import Poscar
+
+import matplotlib as mpl
+from matplotlib import rc
+import matplotlib.pyplot as plt
+
+mpl.rcParams.update({'font.size': 16,
+                     'font.family': "serif",
+                     #'font.serif': [],                   
+                     #'font.sans-serif': ["DejaVu Sans"], 
+                     'mathtext.default' : 'regular',
+                    })
+
+poscar = Poscar(fname='CONTCAR')
+coordinates = poscar.get_coordinates()
+
+doscar = Doscar(fname='DOSCAR')
+doscar.read_pdos()
+pdos_df = doscar.get_pdos_df()
+fermi = doscar.get_fermi()
+
+pdos = PDOS(pdos_df)
+pdos.sum_shell()
+pdos.shift_fermi(fermi)
+ldos, x_arry, en_arry = pdos.ldos1d(coordinates=coordinates, axis=2,)
+
+x_mesh, en_mesh = np.meshgrid( x_arry, en_arry, indexing='ij' )
+plt.contourf( x_mesh, en_mesh, ldos, 100,)# cmap='RdGy')
+plt.colorbar()
+plt.xlabel(r'$x \: (Å)$',)
+plt.ylabel(r'$Energy \: (eV)$',)
+
+plt.show()
