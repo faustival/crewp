@@ -2,8 +2,7 @@
 
 import os
 import sys
-from ase.io import read
-from ase.io import write
+from ase.io import read, write
 
 '''
 read structure from .gen file,

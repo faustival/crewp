@@ -1,5 +1,6 @@
 #! /usr/bin/env python3
 
+import sys
 import re
 import numpy as np
 from crewp.dftbplus.pdos import PDOS as PDOS_dp
@@ -17,6 +18,11 @@ mpl.rcParams.update({'font.size': 16,
                      'mathtext.default' : 'regular',
                     })
 
+try:
+    upperlim = float(sys.argv[1])
+except IndexError:
+    upperlim = 5.0
+
 genfname = 'geoinp.gen'
 
 atoms = ase.io.read(genfname)
@@ -28,8 +34,10 @@ pdos.sum_shell()
 ldos, x_arry, en_arry = pdos.ldos1d(coordinates=coordinates, )
 
 x_mesh, en_mesh = np.meshgrid( x_arry, en_arry, indexing='ij' )
-plt.contourf( x_mesh, en_mesh, ldos, 50,)# cmap='RdGy')
-plt.colorbar()
+
+#color_arry = np.linspace(-.2, upperlim, 100, endpoint=True)
+plt.contourf( x_mesh, en_mesh, ldos, 100,)# cmap='RdGy')
+plt.colorbar() #ticks=np.linspace(0., upperlim, 11, endpoint=True))
 plt.xlabel(r'$x \: (Å)$',)
 plt.ylabel(r'$Energy \: (eV)$',)
 

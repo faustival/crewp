@@ -14,6 +14,18 @@ class Doscar:
             self.n_energy_grids = int(words[2])
             self.fermi = float(words[3]) 
 
+    def read_dos(self):
+        df = pd.read_csv( 
+                self.fname, 
+                header=None, 
+                index_col=0,
+                names=['dos', 'intdos'],
+                delim_whitespace=True, 
+                skiprows = 5+1,
+                nrows = self.n_energy_grids,
+                )
+        self.dos_df = df
+
     def read_pdos(self):
         '''
         !!!
@@ -40,7 +52,14 @@ class Doscar:
         df = df.swaplevel(0, 1, 1).sort_index(1)
         self.pdos_df = df
 
+    def get_dos_df(self):
+        if not hasattr(self, 'dos_df'):
+            self.read_dos()
+        return self.dos_df
+
     def get_pdos_df(self):
+        if not hasattr(self, 'pdos_df'):
+            self.read_pdos()
         return self.pdos_df
 
     def get_fermi(self):

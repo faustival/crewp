@@ -1,31 +1,25 @@
 #! /usr/bin/env python3
 
+import os
 import sys
-from crewp.vasp.outcar import Outcar
-from crewp.vasp.poscar import Poscar
-from ase import Atoms, Atom
-from ase.io import write
+from ase.io import read, write
 
 '''
+read structure from VASP POSCAR file,
+write .gen file.
+
 Usage:
-    poscar2gen [outcar_name] [poscar/contcar_name] {genfname}
+    gen_ase [poscarf] {genfile_name}
 '''
 
-outcarf, poscarf = sys.argv[1:3]
-
-outcar = Outcar(outcarf)
-poscar = Poscar(poscarf)
+poscarfname = sys.argv[1]
 
 try:
-    genfname = sys.argv[3]
+    genfname = sys.argv[2]
 except IndexError:
-    genfname = 'from_poscar.gen'
+    genfname = 'from_POSCAR.gen'
 
-atomlist = outcar.get_atomlist()
-coordinates = poscar.get_coordinates()
-cell = poscar.get_cell()
-atom_coord = [ Atom( atomlist[i] , coordinates[i] ) for i in range(len(atomlist)) ]
-myatoms = Atoms ( atom_coord, cell=cell, pbc=True, )
+atoms = read(poscarfname, )
 
-write(genfname, myatoms, format='gen')
+write(genfname, atoms, format='gen')
 
