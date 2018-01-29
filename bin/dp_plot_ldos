@@ -42,3 +42,5 @@ plt.xlabel(r'$x \: (Å)$',)
 plt.ylabel(r'$Energy \: (eV)$',)
 
 plt.show()
+
+

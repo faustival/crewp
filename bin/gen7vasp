@@ -19,7 +19,7 @@ try:
 except IndexError:
     poscarfname = 'POSCAR_from_gen'
 
-atoms = read(genfname, )
+atoms = read(genfname, format='gen')
 
 write(poscarfname, atoms, format='vasp')
 
