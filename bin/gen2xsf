@@ -1,0 +1,31 @@
+#! /usr/bin/env python3
+
+import sys
+import numpy as np
+from ase.io import read as ase_read
+from ase.io import write as ase_write
+
+'''
+read structure from .gen file,
+write XCrySDen XSF file.
+
+Usage:
+    gen2axsf [genfile_name] {xsf_name}
+'''
+
+print( sys.version )
+
+print(sys.argv)
+
+genfname = sys.argv[1]
+if len(sys.argv) < 3:
+    xsfname = 'from_gen.xsf'
+else:
+    xsfname = sys.argv[2]
+
+print('Reading .gen file, ', genfname)
+
+atoms = ase_read(genfname, format='gen')
+
+ase_write(xsfname, atoms, format='xsf')
+

@@ -62,9 +62,6 @@ class Outcar:
     The following methods was not initiated in __init__(self)
     '''
 
-    def get_atomlist(self):
-        return self.atomlist
-
     def read_latvecs(self):
         '''
         Lattice vectors
@@ -176,5 +173,12 @@ class Outcar:
             if not line: break
         outcarf.close()
 
+    '''
+    Methods only for return things
+    '''
 
+    def get_atomlist(self):
+        if not hasattr(self, 'atomlist'):
+            self.gen_atomlist()
+        return self.atomlist
 

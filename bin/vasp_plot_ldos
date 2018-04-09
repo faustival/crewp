@@ -29,10 +29,10 @@ coordinates = poscar.get_coordinates()
 doscar = Doscar(fname='DOSCAR')
 doscar.read_pdos()
 pdos_df = doscar.get_pdos_df()
+#print(pdos_df)
 fermi = doscar.get_fermi()
 
 pdos = PDOS(pdos_df)
-pdos.sum_shell()
 pdos.shift_fermi(fermi)
 ldos, x_arry, en_arry = pdos.ldos1d(coordinates=coordinates, axis=0,)
 

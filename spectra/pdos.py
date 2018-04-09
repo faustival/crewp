@@ -29,6 +29,7 @@ class PDOS:
         coordinates: All atom 3D-array, must match the order in self.pdos_df columns.
         axis: broadening LDOS along 0, 1, 2; for x, y, z, respectively.
         '''
+        self.pdos_df = self.pdos_df.sum(axis=1, level=[0])
         atom_idx_list = self.pdos_df.columns.values
         atom_positions = coordinates[ atom_idx_list, axis ]
         x_arry = np.linspace(np.amin(atom_positions)-margin, np.amax(atom_positions)+margin, 1000 )
@@ -38,9 +39,6 @@ class PDOS:
             x_mesh, en_mesh = np.meshgrid( x_arry, self.pdos_df.loc[:, atom_idx] , indexing='ij')
             ldos += en_mesh * gaussian( x_mesh, atom_positions[i], sigma=1.)
         return ldos, x_arry, en_arry
-
-    def sum_shell(self, ):
-        self.pdos_df = self.pdos_df.sum(axis=1, level=[0])
 
     def write_df(self, fname='pdos_df.dat'):
         self.pdos_df.to_csv(
@@ -71,4 +69,9 @@ class PDOS:
         col_idx = self.pdos_df.columns
         col_idx = col_idx.set_levels(col_idx.levels[0].astype(int), level=0)
         self.pdos_df.columns = col_idx
+
+    '''
+    Methods only for return things
+    '''
+
 
