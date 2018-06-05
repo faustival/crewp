@@ -1,0 +1,28 @@
+#! /usr/bin/env python3
+
+import csv
+import pandas as pd
+from crewp.lodestar.reorg_mpi_datatable import reorg_mpi_df
+
+'''
+Combine PDOS.orb.### from MPI run
+use as:
+    combinepdos
+'''
+
+df_full = reorg_mpi_df('PDOS.orb.')
+
+# read header for sizes, to be written
+with open('PDOS.orb.000') as f:
+    headline = f.readline()
+norbital, nsep = [ int(i) for i in headline.split() ]
+
+# write to PDOS.orb
+print( 'Writing PDOS.orb ...' )
+header = [headline.strip()] + ['']*norbital
+df_full.to_csv( 'PDOS.orb', 
+        float_format='%19.12e', sep=' ', 
+        quoting=csv.QUOTE_NONE, escapechar=" ", 
+        index=False,
+        header=header,
+        )

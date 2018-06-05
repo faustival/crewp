@@ -1,0 +1,29 @@
+#! /usr/bin/env python3
+
+import sys
+import numpy as np
+from ase.io import read as ase_read
+from ase.io import write as ase_write
+
+'''
+Shift: 
+    shift input_genfname axis shift_from shift_distance
+    shift_axis: x: 0; y: 1; z: 2.
+'''
+
+init_genfname = sys.argv[1]
+shift_axis = int(sys.argv[2]) # refers to initial geometry
+shift_from = float(sys.argv[3]) # refers to initial geometry
+shift_dist = float(sys.argv[4])
+oup_genfname = 'from_shift.gen'
+
+# read initial geometry
+atoms = ase_read(init_genfname, format='gen')
+coord = atoms.get_positions()
+# shift
+coord[ coord[:,shift_axis] > shift_from , shift_axis ] += shift_dist
+atoms.set_positions(coord)
+# write
+ase_write(oup_genfname, atoms, format='gen') 
+
+

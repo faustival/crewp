@@ -30,7 +30,6 @@ coordinates = atoms.get_positions()
 
 pdos = PDOS(None)
 pdos.read_df('pdos_df.dat', header=[0,1] )
-pdos.sum_shell()
 ldos, x_arry, en_arry = pdos.ldos1d(coordinates=coordinates, )
 
 x_mesh, en_mesh = np.meshgrid( x_arry, en_arry, indexing='ij' )

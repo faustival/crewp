@@ -1,0 +1,42 @@
+#! /usr/bin/env python3
+
+'''
+VCA doping from existed restartf
+read Undoped Restartf and add the VCA charge for each atoms to Mulliken charge 
+use as:
+    vca4restartf genfname restartfname ChemicalSymbol VCA_Charge
+'''
+
+import sys
+import pandas as pd
+from ase.io import read 
+from crewp.lodestar.restartf import read as read_restartf
+from crewp.lodestar.doping_vca import DopingVCA
+
+genfname = sys.argv[1]
+restartfname = sys.argv[2]
+#qzerofname = sys.argv[3]
+[chemsym, vca_chrg] = [sys.argv[3], float(sys.argv[4])] # [chemical_symbol, VCA_charge]
+newrestartf = 'TAPE.restartf.VCAdoped'
+
+# read .gen file, get chemical symbol list.
+atoms = read(genfname, )
+chemsym_list = atoms.get_chemical_symbols()
+
+# read TAPE.restartf, get atomid-Mulliken charge DataFrame.
+mulliken_df = read_restartf(restartfname, )
+
+data = { 
+        'Element' : chemsym_list, 
+        'Mulliken0' : mulliken_df['Mulliken'].values,
+        }
+
+mulliken_df = pd.DataFrame( data, index=mulliken_df.index)
+
+doping = DopingVCA(mulliken_df)
+doping.dope_element( [chemsym, vca_chrg] )
+
+doping.write_qzerof(fname='qzero.inp')
+doping.write_doped_restartf(fname='TAPE.restartf.VCAdoped')
+
+

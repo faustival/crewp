@@ -2,7 +2,7 @@
 
 import sys
 import numpy as np
-from crewp.gaussian.oupf import Oupf
+from crewp.gaus_chem.oupf import Oupf
 from crewp.spectra.spectra import Spectra
 import matplotlib as mpl
 from matplotlib import rc

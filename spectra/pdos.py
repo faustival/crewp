@@ -2,10 +2,7 @@
 import csv
 import numpy as np
 import pandas as pd
-
-def gaussian(x, x0, sigma):
-    return 1./(sigma*np.sqrt(2.*np.pi)) *\
-            np.exp( -.5 * ((x-x0)/sigma)**2  )
+from crewp.spectra.func_distrib import gaussian, slater
 
 class PDOS:
 
@@ -17,7 +14,7 @@ class PDOS:
         en_arry -= fermi
         self.pdos_df.set_index(en_arry)
 
-    def ldos1d(self, coordinates, axis=0, margin=10., broaden='Gaussian'):
+    def ldos1d(self, coordinates, axis=0, margin=1., broaden='Slater'):
         '''
         !!!
         Move this to new class after all features are developed.
@@ -37,7 +34,10 @@ class PDOS:
         ldos = np.zeros((x_arry.size, en_arry.size))
         for i, atom_idx in enumerate(atom_idx_list):
             x_mesh, en_mesh = np.meshgrid( x_arry, self.pdos_df.loc[:, atom_idx] , indexing='ij')
-            ldos += en_mesh * gaussian( x_mesh, atom_positions[i], sigma=1.)
+            if broaden=='Gaussian':
+                ldos += en_mesh * gaussian( x_mesh, atom_positions[i], sigma=.5)
+            elif broaden=='Slater':
+                ldos += en_mesh * slater( x_mesh, atom_positions[i], sigma=3.2*0.247/0.529177249 )
         return ldos, x_arry, en_arry
 
     def write_df(self, fname='pdos_df.dat'):
