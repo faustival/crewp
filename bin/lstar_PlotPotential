@@ -6,17 +6,16 @@ import numpy as np
 import matplotlib as mpl
 from matplotlib import rc
 import matplotlib.pyplot as plt
-from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from crewp.lodestar.stdout import get_poissonbox
 
 stdoutf = 'out.000'
-chargef = 'charge.dat'
+potf = 'potential.dat'
 
 # get grid size of Poisson Box
 (nx, ny, nz) = get_poissonbox(stdoutf)
 # load charge data 
-grid_chrg = np.loadtxt(chargef,) 
+grid_chrg = np.loadtxt(potf,) 
 # reshape to adapt the contour plot
 x_mesh = grid_chrg[:,0].reshape(nx, ny)
 y_mesh = grid_chrg[:,1].reshape(nx, ny)
@@ -24,7 +23,6 @@ chrg = grid_chrg[:,2].reshape(nx, ny)
 
 mpl.rcParams.update({'font.size': 20,
                      'font.family': "serif",
-                     'figure.figsize': (35,3),
                      #'figure.figsize': (nx,ny),
                      #'font.serif': [],                   
                      #'font.sans-serif': ["DejaVu Sans"], 
@@ -41,15 +39,12 @@ except IndexError:
 fig = plt.figure()
 ax = fig.add_subplot(1,1,1,)
 
-divider = make_axes_locatable(ax)
-ax_cbar = divider.append_axes('top', size="15%", pad=0.5, )#pack_start=True)
-
 cmap= 'coolwarm'   # 'coolwarm'
 color_arry = np.linspace(lowerlim, upperlim, 100, endpoint=True)
 #tick_arry = np.arange(0., upperlim, 0.01, )
 
 charge_contour = ax.contourf( x_mesh, y_mesh, chrg, color_arry, cmap=cmap, extend='both', ) #vmin=-.5, vmax=5.5, ) 
-fig.colorbar(charge_contour, cax=ax_cbar, orientation='horizontal', ) #ticks=tick_arry, )
+cbar = plt.colorbar(charge_contour, ax=ax, orientation='horizontal', ) #ticks=tick_arry, )
 
 ax.set_xlabel(r'$x \: (Å)$',)
 ax.set_ylabel(r'$y \: (Å)$',)

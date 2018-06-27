@@ -1,4 +1,3 @@
-
 import numpy as np
 
 '''
@@ -7,6 +6,7 @@ import numpy as np
 ev2wvnum = 8065.541154
 au2ev = 27.2113961
 au2wvnum = au2ev*ev2wvnum
+joule2ev = 6.241506e+18
 
 '''
 # length

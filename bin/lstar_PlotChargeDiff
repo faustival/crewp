@@ -22,10 +22,41 @@ x_mesh = grid_chrg[:,0].reshape(nx, ny)
 y_mesh = grid_chrg[:,1].reshape(nx, ny)
 chrg = grid_chrg[:,2].reshape(nx, ny)
 
+n_units = 8
+l_units = 9.4395
+
+xmax = x_mesh.max()
+x_intercept_lead = xmax - l_units
+np.set_printoptions(threshold=np.nan)
+#print('x_mesh : ', x_mesh[:,0])
+print('Size of arrays : ', chrg.shape)
+print('xmax = ', xmax)
+print('x_intercept_lead = ', x_intercept_lead)
+
+chrg_lead = chrg[ x_mesh[:,0] > x_intercept_lead , : ]
+ngridx_lead_repeat = chrg_lead.shape[0]-1
+
+x_mesh_dpl = x_mesh[ -(ngridx_lead_repeat*n_units+1): , : ]
+y_mesh_dpl = y_mesh[ -(ngridx_lead_repeat*n_units+1): , : ]
+chrg_dpl = chrg[ -(ngridx_lead_repeat*n_units+1): , : ]
+
+chrg_lead_repeat = chrg_lead[:-1,:].copy()
+
+chrg_lead_ext = chrg_lead
+for _ in range(n_units-1):
+    chrg_lead_ext = np.concatenate((chrg_lead_repeat, chrg_lead_ext), axis=0)
+
+print('Size of lead arrays: ', chrg_lead.shape)
+print('Size of lead extension arrays: ', chrg_lead_ext.shape)
+print('Size of depletion arrays: ', chrg_dpl.shape)
+
+chrg_diff = chrg_dpl - chrg_lead_ext
+
+#sys.exit()
+
 mpl.rcParams.update({'font.size': 20,
                      'font.family': "serif",
                      'figure.figsize': (35,3),
-                     #'figure.figsize': (nx,ny),
                      #'font.serif': [],                   
                      #'font.sans-serif': ["DejaVu Sans"], 
                      'mathtext.default' : 'regular',
@@ -35,8 +66,8 @@ try:
     lowerlim = float(sys.argv[1])
     upperlim = float(sys.argv[2])
 except IndexError:
-    lowerlim = chrg.min()
-    upperlim = chrg.max()
+    lowerlim = chrg_diff.min()
+    upperlim = chrg_diff.max()
 
 fig = plt.figure()
 ax = fig.add_subplot(1,1,1,)
@@ -48,10 +79,12 @@ cmap= 'coolwarm'   # 'coolwarm'
 color_arry = np.linspace(lowerlim, upperlim, 100, endpoint=True)
 #tick_arry = np.arange(0., upperlim, 0.01, )
 
-charge_contour = ax.contourf( x_mesh, y_mesh, chrg, color_arry, cmap=cmap, extend='both', ) #vmin=-.5, vmax=5.5, ) 
-fig.colorbar(charge_contour, cax=ax_cbar, orientation='horizontal', ) #ticks=tick_arry, )
+charge_contour = ax.contourf( x_mesh_dpl, y_mesh_dpl, chrg_diff, color_arry, cmap=cmap, extend='both', ) #vmin=-.5, vmax=5.5, ) 
+fig.colorbar(charge_contour, cax=ax_cbar, orientation='horizontal', ) #ticks=tick_arry, ax=ax,)
 
 ax.set_xlabel(r'$x \: (Å)$',)
 ax.set_ylabel(r'$y \: (Å)$',)
 
 plt.show()
+
+

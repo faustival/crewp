@@ -13,6 +13,7 @@ def float_from_re(fname, content, ):
             'fermi': [ '^\s*Fermi Energy          =', -1 ] ,
             'fermi_Llead': [ '^\s*Lead  1 Fermi energy in Lead File =', -1 ] ,
             'fermi_Rlead': [ '^\s*Lead  2 Fermi energy in Lead File =', -1 ] ,
+            'temperature': [ '^\s*Temperature :         ', -1 ] ,
             'ept_inelastic': [ '^\s*Steady state current\(inelastic LoE\) :', -2 ] ,
             }
     [re_key, position] = content_dict[content]
