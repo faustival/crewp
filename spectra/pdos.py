@@ -1,6 +1,8 @@
 
+import sys
 import csv
 import numpy as np
+from scipy.integrate import simps, trapz
 import pandas as pd
 from crewp.spectra.func_distrib import gaussian, slater, fermi
 
@@ -44,14 +46,15 @@ class PDOS:
         col_idx = col_idx.set_levels(col_idx.levels[0].astype(int), level=0)
         self.pdos_df.columns = col_idx
 
-    def get_pop_df(self, temp):
+    def get_pop_df(self, temp, integral):
         '''
         # get population on orbitals by 
         # integrating PDOS with Fermi weight 
         TODO:
             1. Chemical potential set as 0.
             2. PDOS level fixed to orbital-resolved
-        temp: Temperature, Kelvin.
+        temp: Temperature, for calling Fermi distribution, Kelvin.
+        integral: method of integration routines: 'simps', 'trapz', called from scipy
         '''
         pdos_df = self.pdos_df
         # Energy array
@@ -61,7 +64,12 @@ class PDOS:
         # sum PDOS to orbital ( TOBE conditioned )
         pdos_df = pdos_df.sum(axis=1, level=[0,1,2])
         # integrate: ( \int PDOS(E)*Fermi(E) d E )
-        pop_arry = np.trapz( pdos_df.multiply(fermi_distr, axis='index'), x=en_arry, axis=0 ) 
+        if integral=='trapz':
+            pop_arry = trapz( pdos_df.multiply(fermi_distr, axis='index'), x=en_arry, axis=0 )
+        elif integral=='simps':
+            pop_arry = trapz( pdos_df.multiply(fermi_distr, axis='index'), x=en_arry, axis=0 )
+        else:
+            sys.exit('No proper routine for integaration.')
         # recover index from PDOS dataframe
         pop_df = pd.DataFrame(pop_arry, index=pdos_df.columns) 
         # unstack angular-index to column-index

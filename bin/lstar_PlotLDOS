@@ -11,7 +11,7 @@ from matplotlib import rc
 import matplotlib.pyplot as plt
 
 from ase.io import read as ase_read
-from crewp.lodestar.pdos import read_pdos_df
+from crewp.lodestar.orbitals import Orbitals
 from crewp.spectra.pdos import PDOS
 
 mpl.rcParams.update({'font.size': 20,
@@ -40,7 +40,8 @@ In 'PDOS.orb', Fermi has already shifted to non-equilibrium.
 
 @timer
 def get_pdos():
-    pdos_df = read_pdos_df(genfname, oupfname, pdosfname)
+    orbitals = Orbitals(genfname, oupfname)
+    pdos_df = orbitals.read_pdos_df(pdosfname)
     print('PDOS_df: ', sys.getsizeof(pdos_df)/1024.**2, 'MB')
     #store = pd.HDFStore('pdos_df.h5')
     return pdos_df
@@ -59,7 +60,7 @@ def get_ldos():
         x_arry = arrays['x_arry']
         en_arry = arrays['en_arry']
     else:
-        ldos, x_arry, en_arry = pdos.ldos1d(coordinates=coordinates, axis=0, broaden='Slater')
+        ldos, x_arry, en_arry = pdos.get_ldos1d(coordinates=coordinates, axis=0, broaden='Slater')
         np.savez('ldos_array.npz', ldos=ldos, x_arry=x_arry, en_arry=en_arry)
     print('LDOS: ', sys.getsizeof(ldos)/1024.**2, 'MB')
     return ldos, x_arry, en_arry
