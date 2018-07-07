@@ -67,7 +67,7 @@ class PDOS:
         if integral=='trapz':
             pop_arry = trapz( pdos_df.multiply(fermi_distr, axis='index'), x=en_arry, axis=0 )
         elif integral=='simps':
-            pop_arry = trapz( pdos_df.multiply(fermi_distr, axis='index'), x=en_arry, axis=0 )
+            pop_arry = simps( pdos_df.multiply(fermi_distr, axis='index'), x=en_arry, axis=0 )
         else:
             sys.exit('No proper routine for integaration.')
         # recover index from PDOS dataframe
