@@ -3,30 +3,41 @@ import numpy as np
 import sys
 import builtins
 
-def wrt_2darry(arry2, title, rowtags='', f=sys.stdout, convtype='float', ):
+def wrt_2darry( 
+        arry2,  #2-dimensional array
+        title='',  # title line
+        rowtags='',  # tag of rows, see full comments
+        f=sys.stdout, # file for writing
+        wtype='',
+        fmt='',
+        lmargin=' ', # left margin
+        sep=' ', # separation between entries
+        ):
     '''
-    Printing 2-index array, i.e., matrix
+    Printing 2-dimensional array, i.e., matrix
     rowtags: should be none, or sequence match row number of arry2 
     '''
     if title:
         f.write(title+'\n')
-    if rowtags: # determine type and print format of rowtag
-        if type(rowtags[0])==str: # treat tags as string
-            tagfmt = '{:5s}'
-        elif type(rowtags[0])==int:
-            tagfmt = '{:5d}'
-        for i, vec in enumerate(arry2): # iterating rows
-            rowtag = tagfmt.format(rowtags[i])
-            if convtype=='float':
-                f.write( '   '+rowtag+' '.join( '{:13.8f}'.format(entry) for entry in vec ) )
-            elif convtype=='int':
-                f.write( '   '+rowtag+' '.join( '{:d}'.format(entry) for entry in vec ) )
-            f.write('\n')
-    elif not rowtags: # no row tags
-        for vec in arry2: # iterating rows
-            f.write( '   '+' '.join( '{:13.8f}'.format(entry) for entry in vec ) )
-            f.write('\n')
-    #f.write('\n')
+    if rowtags: 
+        # automatic determine type and format of rowtag
+        if type(rowtags[0])==str: tagfmt = '{:5s}'
+        elif type(rowtags[0])==int: tagfmt = '{:5d}'
+    if not fmt: 
+        # automatic determine format by type of 1st entry of arry2
+        if wtype=='str' or isinstance(arry2[0][0], (str)): 
+            fmt='{:5s}'
+        elif wtype=='int' or isinstance(arry2[0][0], (int)): 
+            fmt='{:5d}'
+        elif wtype=='float' or isinstance(arry2[0][0], (float)): 
+            fmt='{:13.8f}' 
+        else: sys.exit("In ``wrt_2darry``, auto type search for: "+str(arry2[0][0])+", No proper type found!")
+    # write 2-dimensional array 
+    for i, vec in enumerate(arry2): 
+        if rowtags: rowtag = tagfmt.format(rowtags[i])
+        else: rowtag = ''
+        f.write( lmargin+rowtag+sep.join( [fmt.format(entry) for entry in vec] ) )
+        f.write('\n')
 
 def wrt_3darry(arry3, title, f=sys.stdout):
     '''

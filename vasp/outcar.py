@@ -140,6 +140,20 @@ class Outcar:
         outcarf.close() # always put this on bottom of readline loop
         return np.array(vib_pos3_eigvec3)
 
+    '''
+    Methods only for return things
+    '''
+
+    def get_atomlist(self):
+        if not hasattr(self, 'atomlist'):
+            self.gen_atomlist()
+        return self.atomlist
+
+    def get_latvecs(self):
+        if not hasattr(self, 'latvecs'):
+            self.read_latvecs()
+        return self.latvecs
+
     def auto_creep(self):
         '''
         Determine type of ionic update by reading ``IBRION``.
@@ -156,29 +170,10 @@ class Outcar:
             elif not line: break
         outcarf.close()
         if 0 <= ibrion <= 3:
-            self.anim_vec6d = self.get_rlx_steps() 
+            anim_vec6d = self.get_rlx_steps() 
         elif 5 <= ibrion <= 8:
-            self.anim_vec6d = self.get_vib()
+            anim_vec6d = self.get_vib()
         else:
             sys.exit('No IBRION match, auto_creep stop running.')
-        self.ibrion = ibrion
-
-    def get_template(self):
-        '''
-        A template for creeping over OUTCAR line by line
-        '''
-        outcarf = open(self.fname, 'r')
-        while True:
-            line = outcarf.readline()
-            if not line: break
-        outcarf.close()
-
-    '''
-    Methods only for return things
-    '''
-
-    def get_atomlist(self):
-        if not hasattr(self, 'atomlist'):
-            self.gen_atomlist()
-        return self.atomlist
+        return ibrion, anim_vec6d
 

@@ -1,15 +1,18 @@
 #! /usr/bin/env python3
 
 import sys
+import time
 import re
 import numpy as np
-from crewp.dftbplus.pdos import PDOS as PDOS_dp
-from crewp.spectra.pdos import PDOS
-import ase.io
+import os.path
 
 import matplotlib as mpl
 from matplotlib import rc
 import matplotlib.pyplot as plt
+
+import ase.io
+from crewp.dftbplus.pdos import PDOS as PDOS_dp
+from crewp.spectra.pdos import PDOS
 
 mpl.rcParams.update({'font.size': 16,
                      'font.family': "serif",
@@ -18,11 +21,6 @@ mpl.rcParams.update({'font.size': 16,
                      'mathtext.default' : 'regular',
                     })
 
-try:
-    upperlim = float(sys.argv[1])
-except IndexError:
-    upperlim = 5.0
-
 genfname = 'geoinp.gen'
 
 atoms = ase.io.read(genfname)
@@ -30,16 +28,56 @@ coordinates = atoms.get_positions()
 
 pdos = PDOS(None)
 pdos.read_df('pdos_df.dat', header=[0,1] )
-ldos, x_arry, en_arry = pdos.ldos1d(coordinates=coordinates, )
+
+def timer(f):
+    def f_timer(*args, **kwargs):
+        start = time.time()
+        result = f(*args, **kwargs)
+        end = time.time()
+        print(f.__name__, 'took time:', end - start, )
+        return result
+    return f_timer
+
+@timer
+def get_ldos():
+    if os.path.isfile('ldos_array.npz'):
+        arrays = np.load('ldos_array.npz')
+        ldos = arrays['ldos']
+        x_arry = arrays['x_arry']
+        en_arry = arrays['en_arry']
+    else:
+        ldos, x_arry, en_arry = pdos.get_ldos1d(coordinates=coordinates, axis=0, broaden='Slater')
+        np.savez('ldos_array.npz', ldos=ldos, x_arry=x_arry, en_arry=en_arry)
+    print('LDOS: ', sys.getsizeof(ldos)/1024.**2, 'MB')
+    return ldos, x_arry, en_arry
+ldos, x_arry, en_arry = get_ldos()
+
+try:
+    upperlim = float(sys.argv[1])
+except IndexError:
+    upperlim = ldos.max()
 
 x_mesh, en_mesh = np.meshgrid( x_arry, en_arry, indexing='ij' )
 
-#color_arry = np.linspace(-.2, upperlim, 100, endpoint=True)
-plt.contourf( x_mesh, en_mesh, ldos, 100,)# cmap='RdGy')
-plt.colorbar() #ticks=np.linspace(0., upperlim, 11, endpoint=True))
-plt.xlabel(r'$x \: (Å)$',)
-plt.ylabel(r'$Energy \: (eV)$',)
+fig = plt.figure()
+ax = fig.add_subplot(1,1,1,)
 
-plt.show()
+cmap= 'coolwarm'   # 'coolwarm'
+color_arry = np.linspace(-0.5, upperlim, 100, endpoint=True)
+tick_arry = np.arange(0., np.ceil(upperlim), 1., )
+
+@timer
+def plot_contour():
+    return ax.contourf( x_mesh, en_mesh, ldos, color_arry, cmap=cmap, extend='both', ) #vmin=-.5, vmax=5.5, ) 
+ldos_contour = plot_contour()
+
+cbar = plt.colorbar(ldos_contour, ax=ax, ticks=tick_arry, )
+ax.set_xlabel(r'$x \: (Å)$',)
+ax.set_ylabel(r'$Energy \: (eV)$',)
+
+@timer
+def show_plot():
+    plt.show()
+show_plot()
 
 

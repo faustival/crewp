@@ -75,7 +75,7 @@ class Write_HSD:
 
     def write_kpointsandweights(self, ndepth):
         if self.curr_dict['key_attr'] == 'SupercellFolding':
-            wrt_2darry( self.curr_dict['kmesh'], title='', rowtags='  '*ndepth, f=self.hsdf, convtype='int' )
+            wrt_2darry( self.curr_dict['kmesh'], title='', rowtags='  '*ndepth, wtype='int', f=self.hsdf, )
             wrt_2darry( np.array( [ self.curr_dict['kshift'] ] ), title='', rowtags='  '*ndepth, f=self.hsdf )
 
     def write_projectstates(self, ndepth):
