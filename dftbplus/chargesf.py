@@ -42,5 +42,13 @@ def read_chrg(genfname='geoinp.gen', chrg_fname='charges.dat', hsdfname='dftb_in
     chrg_arry = np.array(chrg_list)
     return chrg_arry 
 
-def write_chrg(chrg_arry, chemsymbol_list, max_orbital_dict, chargesf='charges_from_crewp.dat' ):
-    wrt_1darry(chrg_arry, 3,)
+def write_chrg(chrg_arry, chemsymbol_list, max_orbital_dict, chargesfname='charges_from_crewp.dat' ):
+    with open(chargesfname, 'w') as f:
+        f.write( ' 3 F F 1 '+'{:>.12f}'.format(chrg_arry.sum())+'\n' )
+        for i, chrg in enumerate(chrg_arry):
+            chemsymbol = chemsymbol_list[i]
+            n_chrgentry = orb_chrg_entry[max_orbital_dict[chemsymbol]]
+            # charge array for an atom, to be written
+            chrg_arry_atom = np.zeros((n_chrgentry)) 
+            chrg_arry_atom[0] = chrg
+            wrt_1darry(chrg_arry_atom, col_lim=3, f=f, fmt='{:<16.12f}' )
