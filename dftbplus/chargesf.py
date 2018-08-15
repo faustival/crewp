@@ -51,4 +51,4 @@ def write_chrg(chrg_arry, chemsymbol_list, max_orbital_dict, chargesfname='charg
             # charge array for an atom, to be written
             chrg_arry_atom = np.zeros((n_chrgentry)) 
             chrg_arry_atom[0] = chrg
-            wrt_1darry(chrg_arry_atom, col_lim=3, f=f, fmt='{:<16.12f}' )
+            wrt_1darry(chrg_arry_atom, col_lim=3, f=f, fmt='{:<16.12f}', lmargin=1, )
