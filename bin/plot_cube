@@ -1,0 +1,22 @@
+#! /usr/bin/env python3
+
+import sys
+import numpy as np
+
+import matplotlib as mpl
+from matplotlib import rc
+import matplotlib.pyplot as plt
+
+from crewp.gaus_chem.cube import read_cube
+
+mpl.rcParams.update({'font.size': 20,
+                     'font.family': "serif",
+                     #'font.serif': [],                   
+                     #'font.sans-serif': ["DejaVu Sans"], 
+                     'mathtext.default' : 'regular',
+                    })
+
+cubefname = sys.argv[1]
+
+read_cube(cubefname)
+

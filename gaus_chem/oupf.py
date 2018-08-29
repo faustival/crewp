@@ -131,15 +131,3 @@ class Oupf:
         # Call method to read vibrational info.
         self.get_vib(freq_route_no)
 
-    def get_template(self):
-        '''
-        A template for creeping over oupf line by line
-        '''
-        oupf = open(self.fname, 'r')
-        while True:
-            line = oupf.readline()
-            if not line: break
-        oupf.close()
-
-
-

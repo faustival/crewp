@@ -11,7 +11,7 @@ joule2ev = 6.241506e+18
 '''
 # length
 '''
-bohr2ang = 0.529177
+bohr2ang = 0.529177249e0
 ang2cm = 1.0e-8
 
 '''

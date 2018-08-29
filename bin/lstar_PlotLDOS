@@ -45,12 +45,6 @@ def get_pdos():
     print('PDOS_df: ', sys.getsizeof(pdos_df)/1024.**2, 'MB')
     #store = pd.HDFStore('pdos_df.h5')
     return pdos_df
-pdos_df = get_pdos()
-
-pdos = PDOS(pdos_df)
-
-atoms = ase_read(filename=genfname, format='gen')
-coordinates = atoms.get_positions()
 
 @timer
 def get_ldos():
@@ -60,6 +54,10 @@ def get_ldos():
         x_arry = arrays['x_arry']
         en_arry = arrays['en_arry']
     else:
+        pdos_df = get_pdos()
+        pdos = PDOS(pdos_df)
+        atoms = ase_read(filename=genfname, format='gen')
+        coordinates = atoms.get_positions()
         ldos, x_arry, en_arry = pdos.get_ldos1d(coordinates=coordinates, axis=0, broaden='Slater')
         np.savez('ldos_array.npz', ldos=ldos, x_arry=x_arry, en_arry=en_arry)
     print('LDOS: ', sys.getsizeof(ldos)/1024.**2, 'MB')
