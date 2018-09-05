@@ -6,8 +6,9 @@ import numpy as np
 import matplotlib as mpl
 from matplotlib import rc
 import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-from crewp.gaus_chem.cube import read_cube
+from crewp.scalar_field import ScalarField
 
 mpl.rcParams.update({'font.size': 20,
                      'font.family': "serif",
@@ -18,5 +19,33 @@ mpl.rcParams.update({'font.size': 20,
 
 cubefname = sys.argv[1]
 
-read_cube(cubefname)
+charge = ScalarField(inpfname=cubefname)
+chrg = charge.get_avg2d(axis=1)
+xarry, yarry, zarry = charge.get_cartesgrid_arry()
 
+xmesh, zmesh = np.meshgrid( xarry, zarry, indexing='ij', )
+
+try:
+    lowerlim = float(sys.argv[2])
+    upperlim = float(sys.argv[3])
+except IndexError:
+    lowerlim = chrg.min()
+    upperlim = chrg.max()
+
+fig = plt.figure()
+ax = fig.add_subplot(1,1,1,)
+
+divider = make_axes_locatable(ax)
+ax_cbar = divider.append_axes('top', size="15%", pad=0.5, )#pack_start=True)
+
+cmap= 'coolwarm'   # 'coolwarm'
+color_arry = np.linspace(lowerlim, upperlim, 100, endpoint=True)
+#tick_arry = np.arange(0., upperlim, 0.01, )
+
+charge_contour = ax.contourf( xmesh, zmesh, chrg, color_arry, cmap=cmap, extend='both', ) #vmin=-.5, vmax=5.5, ) 
+fig.colorbar(charge_contour, cax=ax_cbar, orientation='horizontal', ) #ticks=tick_arry, )
+
+ax.set_xlabel(r'$x \: (Å)$',)
+ax.set_ylabel(r'$y \: (Å)$',)
+
+plt.show()

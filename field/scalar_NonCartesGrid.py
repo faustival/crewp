@@ -1,25 +1,14 @@
 
-import numpy as np
 from scipy.integrate import simps
+from crewp.gaus_chem.cube import read_cube
 
-class ChrgAvgZ:
+class ScalarField:
     '''
-    All methods are unit independent.
+    Old methods, DON'T USE.
     '''
-
-    def __init__(self, chrg, cell):
-        '''
-        chrg should be shaped as (nz, ny, nx)
-        that is, z-major, x-contiguous
-        '''
-        self.chrg = chrg
-        self.cell = cell
-        self.ngridz = self.chrg.shape[0]
-
-    def xyavg(self):
-        avgchrg = [np.mean(self.chrg[i,:,:]) for i in range(self.ngridz)]
-        avgchrg = np.array(avgchrg)
-        return avgchrg
+    def __init__( 
+            self,
+            ):
 
     def zgrid(self):
         zaxis = np.linspace(0., self.cell[2,2], self.ngridz)
