@@ -18,14 +18,18 @@ def read_cube(cubefname):
     with open(cubefname, 'r') as f:
         f.readline() # 1st comment line
         f.readline() # 2nd comment line
+        # 3rd line:
         natom, x0, y0, z0 = f.readline().split()
         natom, x0, y0, z0 = int(natom), float(x0)*bohr2ang, float(y0)*bohr2ang, float(z0)*bohr2ang, 
         r0 = np.array([x0, y0, z0])
+        # 4~6 lines:
         ng_dr = read_2darry(f, nrow=3, typefunc='str')
         ngrid = ng_dr[:,0].astype(int)
         dr = ng_dr[:,1:].astype(float)*bohr2ang
+        # atomic coordinates, natoms lines:
         for i in range(natom):
             f.readline() # atomic coordinates
+        # volumetric 3d scalar field:
         volumdata = np.fromfile(f, count=np.prod(ngrid), sep=' ')
         volumdata = volumdata.reshape(ngrid)
         return r0, dr, volumdata

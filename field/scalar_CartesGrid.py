@@ -10,37 +10,48 @@ class ScalarField:
     '''
     def __init__( 
             self, 
-            data3d=None,   # 3d-array
+            data3d=None, # 3d-array,
             cell=None, # 3*3 array, vectors of cell 
-            delta_grid=None, # 3*3 array, vectors of grid increament
-            cell_origin=None, # 1*3 array, origin coordinate
+            grid_measure=None, # 3*3 array, vectors of grid increament
+            delta_grid=None, # 1*3 array, (dx, dy, dz)
+            cell_origin=None, # 1*3 array, (x0, y0, z0)
+            inptype=None, # raw input, or file type 'cube'...
             inpfname=None, # 
             ):
-        if inpfname:
-            self.cell_origin, self.delta_grid, self.data3d = read_cube(inpfname)
+        '''
+        Dealing with types of input:
+        '''
+        if inptype=='cube' and inpfname:
+            self.cell_origin, self.grid_measure, self.data3d = read_cube(inpfname)
         else:
-            sys.exit('Input for ScalarField, not implemented.')
+            sys.exit('Crewp:ScalarField: Input for ScalarField, not implemented.')
+        '''
+        Case: get ``delta_grid`` from ``grid_measure`` matrix.
+        '''
+        if (not hasattr(self, 'delta_grid')) and hasattr(self, 'grid_measure'):
+            if np.count_nonzero(self.grid_measure - np.diag(np.diagonal(self.grid_measure))) != 0 : # test if grid_measure diagonal.
+                sys.exit('Crewp:ScalarField: Non-Cartesian grid of ScalarField, not implemented.')
+            else:
+                self.delta_grid = np.diagonal(self.grid_measure)
         self.gridshape = self.data3d.shape
 
-    def test_cartesgrid(self):
+    def get_grid_arrys(self):
         '''
-        Determine if grid is Cartesian.
-        by evaluate ``cell`` or ``delta_grid`` is diagonal.
+        Calculate grid arrays from increaments ``delta_grid``
+        Return a list of grid arrays, length may not be equal.
+        [ 
+            (x_0, x_1, ... x_nx),  
+            (y_0, y_1, .... y_ny),  
+            (z_0, z_1, ..... z_nz),  
+        ]
         '''
-        m = self.delta_grid
-        self.t_cartesgrid = ( np.count_nonzero(m - np.diag(np.diagonal(m))) == 0 )
-        return self.t_cartesgrid
-
-    def get_cartesgrid_arry(self):
-        if self.test_cartesgrid():
-            dx, dy, dz = np.diagonal(self.delta_grid)
-            self.cartesgrid_arry = []
-            for i, dl in enumerate( [dx, dy, dz] ):
-                ng = self.gridshape[i]
-                l0 = self.cell_origin[i]
-                grid_arry = l0 + dl*np.arange(ng) 
-                self.cartesgrid_arry.append(grid_arry)
-        return self.cartesgrid_arry
+        self.grid_arry = []
+        for i, dl in enumerate( self.delta_grid ):
+            ng = self.gridshape[i]
+            l0 = self.cell_origin[i]
+            grid_arry = l0 + dl*np.arange(ng) 
+            self.grid_arry.append(grid_arry)
+        return self.grid_arry
 
     def get_avg2d(self, axis):
         '''
@@ -49,3 +60,10 @@ class ScalarField:
         avg2d = np.mean(self.data3d, axis=axis)
         return avg2d
 
+    def get_avg1d(self, axes):
+        '''
+        Average through axes.
+        '''
+        avg2d = np.mean(self.data3d, axis=max(axes))
+        avg1d = np.mean(avg2d, axis=min(axes))
+        return avg1d

@@ -8,7 +8,7 @@ from matplotlib import rc
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-from crewp.scalar_field import ScalarField
+from crewp.field.scalar_CartesGrid import ScalarField
 
 mpl.rcParams.update({'font.size': 20,
                      'font.family': "serif",
@@ -19,9 +19,9 @@ mpl.rcParams.update({'font.size': 20,
 
 cubefname = sys.argv[1]
 
-charge = ScalarField(inpfname=cubefname)
+charge = ScalarField(inptype='cube', inpfname=cubefname)
 chrg = charge.get_avg2d(axis=1)
-xarry, yarry, zarry = charge.get_cartesgrid_arry()
+xarry, yarry, zarry = charge.get_grid_arrys()
 
 xmesh, zmesh = np.meshgrid( xarry, zarry, indexing='ij', )
 
