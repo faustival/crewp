@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 
-import sys
 import numpy as np
+import argparse
 
 import matplotlib as mpl
 from matplotlib import rc
@@ -17,35 +17,71 @@ mpl.rcParams.update({'font.size': 20,
                      'mathtext.default' : 'regular',
                     })
 
-cubefname = sys.argv[1]
+'''
+# Parsing input:
+'''
+inpparse = argparse.ArgumentParser()
+inpparse.add_argument(
+    '-i',
+    '--cube',
+    dest='cubefname',
+    help='Filename with cube format',
+    )
+inpparse.add_argument(
+    '-a',
+    '--axs',
+    help="Average to 2d (e.g. 'xz') or 1d (e.g. 'y')"
+    )
+inpparse.add_argument(
+    '-l',
+    '--lowerlim',
+    type=float,
+    help='Lower limit',
+    )
+inpparse.add_argument(
+    '-u',
+    '--upperlim',
+    type=float,
+    help='Upper limit',
+    )
+args = inpparse.parse_args()
 
-charge = ScalarField(inptype='cube', inpfname=cubefname)
-chrg = charge.get_avg2d(axis=1)
-xarry, yarry, zarry = charge.get_grid_arrys()
-
-xmesh, zmesh = np.meshgrid( xarry, zarry, indexing='ij', )
-
-try:
-    lowerlim = float(sys.argv[2])
-    upperlim = float(sys.argv[3])
-except IndexError:
-    lowerlim = chrg.min()
-    upperlim = chrg.max()
+'''
+# Read cube file:
+'''
+field3d = ScalarField(inptype='cube', inpfname=args.cubefname)
 
 fig = plt.figure()
 ax = fig.add_subplot(1,1,1,)
 
-divider = make_axes_locatable(ax)
-ax_cbar = divider.append_axes('top', size="15%", pad=0.5, )#pack_start=True)
+def plot_2d(ax):
+    field2d, arrys = field3d.get_avg2d(axes=args.axs)
+    if args.lowerlim==None: lowerlim = field2d.min()
+    else: lowerlim = args.lowerlim
+    if args.upperlim==None: upperlim = field2d.max()
+    else: upperlim = args.upperlim
+    meshes = np.meshgrid( *arrys,  indexing='ij', )
+    divider = make_axes_locatable(ax)
+    ax_cbar = divider.append_axes('top', size="15%", pad=0.5, )#pack_start=True)
+    cmap= 'coolwarm'   # 'coolwarm'
+    color_arry = np.linspace(lowerlim, upperlim, 100, endpoint=True)
+    #tick_arry = np.arange(0., upperlim, 0.01, )
+    field_contour = ax.contourf( *meshes, field2d, color_arry, cmap=cmap, extend='both', ) #vmin=-.5, vmax=5.5, ) 
+    fig.colorbar(field_contour, cax=ax_cbar, orientation='horizontal', ) #ticks=tick_arry, )
+    ax.set_xlabel('{:s} (Å)'.format(args.axs[0]))
+    ax.set_ylabel('{:s} (Å)'.format(args.axs[1]))
 
-cmap= 'coolwarm'   # 'coolwarm'
-color_arry = np.linspace(lowerlim, upperlim, 100, endpoint=True)
-#tick_arry = np.arange(0., upperlim, 0.01, )
+def plot_1d(ax):
+    field1d, axisarry = field3d.get_avg1d(axis=args.axs)
+    ax.plot( axisarry, field1d )
+    ax.set_xlabel('{:s} (Å)'.format(args.axs))
 
-charge_contour = ax.contourf( xmesh, zmesh, chrg, color_arry, cmap=cmap, extend='both', ) #vmin=-.5, vmax=5.5, ) 
-fig.colorbar(charge_contour, cax=ax_cbar, orientation='horizontal', ) #ticks=tick_arry, )
-
-ax.set_xlabel(r'$x \: (Å)$',)
-ax.set_ylabel(r'$y \: (Å)$',)
+if len(args.axs)==1:
+    plot_1d(ax)
+elif len(args.axs)==2:
+    plot_2d(ax)
 
 plt.show()
+
+
+
