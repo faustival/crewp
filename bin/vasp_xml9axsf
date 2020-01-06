@@ -30,8 +30,8 @@ elif 5 <= xmlf.ibrion <= 8:
     axsfname = 'anim_vib.axsf'
 
 wrt_anim( 
-          primvec = latvec,
-          anim_coords = anim_vec6,
           atomlist = atomlist,
+          anim_coords = anim_vec6,
+          primvec = latvec,
           axsfname = axsfname,
         )  

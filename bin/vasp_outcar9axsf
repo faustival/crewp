@@ -34,9 +34,9 @@ elif 5 <= ibrion <= 8: # vibrational frequencies
     axsfname = 'anim_vib.axsf'
 
 wrt_anim( 
-          primvec = latvecs,
-          anim_coords = anim_vec6d,
           atomlist = atomlist,
+          anim_coords = anim_vec6d,
+          primvec = latvecs,
           axsfname = axsfname,
         )
 

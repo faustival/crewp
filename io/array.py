@@ -71,7 +71,7 @@ def wrt_2darry(
     '''
     if title:
         f.write(title+'\n')
-    if rowtags and not fmt_tag: 
+    if (rowtags is not None) and not fmt_tag: 
         # automatic determine type and format of rowtag
         fmt_tag = auto_fmt(rowtags[0])
     if not fmt: 
@@ -79,7 +79,7 @@ def wrt_2darry(
         fmt = auto_fmt(arry2d[0][0])
     # write 2-dimensional array 
     for i, arry1d in enumerate(arry2d): 
-        if rowtags: rowtag = fmt_tag.format(rowtags[i])
+        if rowtags is not None: rowtag = fmt_tag.format(rowtags[i])
         else: rowtag = ''
         wrt_1darry(arry1d, f, rowtag, fmt, fmt_tag, lmargin, sep, col_lim )
 

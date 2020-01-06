@@ -24,9 +24,12 @@ voltperang2au = 0.019447
 '''
 # amu(atomic mass unit) to gram
 amu2g = 1.660539040e-24 # 1./Avogadro
+amu2au = 1822.888530
 
 '''
 # conversions
 '''
 # electron density of and wigner-seitz sphere
 #rs = (3./(4.*np.pi*rho))**(1/3)
+
+
