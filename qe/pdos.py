@@ -13,7 +13,8 @@ class PDOS:
         self.atomid = atomid
         self.elem = elem
 
-    def get_pdos(self, oupfpre, orbitals, spin=True, poupfname=False):
+    def get_pdos(self, oupfpre, orbitals, spin=True, poupfname=False,
+            datadir='./'):
         '''
         Read the pdos files of the atom, created by ``projwfc.x``.
         the output structure is explained in ``Doc/INPUT_PROJWFC.html``.
@@ -69,10 +70,9 @@ class PDOS:
                     }
         self.pdos = {}
         for orbital, angularlist in orbitals.items():
-            pdosfname = oupfpre + \
-                        '.pdos_atm#' + str(self.atomid) + \
-                        '(' + self.elem + ')_wfc#' + \
-                        orbital_dict[orbital] + '(' + orbital + ')'
+            pdosfname = '{}{}.pdos_atm#{}({})_wfc#{}({})'.format(
+                    datadir, oupfpre, str(self.atomid), self.elem, 
+                    orbital_dict[orbital], orbital )
             if not os.path.isfile(pdosfname):
                 #print('PDOS file', pdosfname, ', does not exist!')
                 sys.exit('PDOS file: ' + pdosfname + '\n' \

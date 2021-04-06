@@ -4,10 +4,11 @@ Implemented with Python dictionary.
 '''
 
 import numpy as np
-from .qe.atom import Atom
+from crewp.qe.pdos import PDOS as qePDOS
 
 class PDOS:
     '''
+    Currently only getpdos for QE.
     Implemented with Python dictionary.
     processing PDOS in a single computation, i.e. system sharing same:
     * fermi energy should be naturally the same.
@@ -18,7 +19,7 @@ class PDOS:
     * plot pdos
     '''
 
-    def __init__(self, atomdict, fermi, readtot=False):
+    def __init__(self, atomdict, fermi=0., readtot=False, datadir='./'):
         '''
         atomdict = {
                     '13':{ 'elem':'Pd', 'orbitals':{'d':['tot','x2-y2'],},
@@ -29,6 +30,7 @@ class PDOS:
         '''
         self.atomdict = atomdict
         self.fermi = fermi
+        self.datadir = datadir
         self.getpdos()
         if readtot:
             cols = np.loadtxt('plt.pdos_tot', unpack=True)
@@ -39,11 +41,11 @@ class PDOS:
         self.atomdict['id']['pdos'] was updated.
         '''
         for atomid, atom in self.atomdict.items():
-            atomobj = Atom(atomid, atom['elem'])
-            atomobj.get_pdos('plt', atom['orbitals'], spin=False)
+            atomobj = qePDOS(atomid, atom['elem'])
+            atomobj.get_pdos('plt', atom['orbitals'], spin=False, datadir=self.datadir)
             atom['pdos'] = atomobj.pdos
             if not hasattr(self, 'enary'):
-                self.enary = atomobj.pdos_enary
+                self.enary = atomobj.pdos_enary - self.fermi
 
     def get_sum_aodict(self, aolist):
         '''
@@ -55,7 +57,7 @@ class PDOS:
         aodict = {}
         for i in aolist:
             atomid = str(i)
-            aodict[atomid] = self.atomdict[atomid]['orbitals']
+            aodict[atomid] = self.tomdict[atomid]['orbitals']
         return aodict
 
     def sumpdos(self, aodict):
@@ -108,6 +110,5 @@ class PDOS:
             line, = self.ax.plot(self.enary - self.fermi, atom['pdos'][orbital][angular], color = color, label=plot_pref+atom['elem']+' '+atomid, linestyle=ls, linewidth=lw )
             if ls=='--':
                 line.set_dashes([5,2.5])
-
 
 
